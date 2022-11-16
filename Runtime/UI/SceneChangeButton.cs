@@ -1,17 +1,39 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SpellBoundAR.SceneManagement.UI
 {
+    [RequireComponent(typeof(Button))]
     public class SceneChangeButton : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] private SceneData _sceneData;
+        [SerializeField] private SceneData sceneData;
 
-        public void OnClick() 
+        [Header("Cache")]
+        private Button _button;
+
+        public SceneData SceneData => sceneData;
+        
+        private void Awake()
         {
-            if (!_sceneData) return;
-            if (SceneManager.Instance) SceneManager.Instance.LoadScene(_sceneData);
-            else UnityEngine.SceneManagement.SceneManager.LoadScene(_sceneData.name);
+            _button = GetComponent<Button>();
+        }
+
+        private void OnEnable()
+        {
+            if (_button) _button.onClick.AddListener(OnClick);
+        }
+
+        private void OnDisable()
+        {
+            if (_button) _button.onClick.RemoveListener(OnClick);
+        }
+
+        protected virtual void OnClick() 
+        {
+            if (!sceneData) return;
+            if (SceneManager.Instance) SceneManager.Instance.LoadScene(sceneData);
+            else UnityEngine.SceneManagement.SceneManager.LoadScene(sceneData.name);
         }
     }
 }
