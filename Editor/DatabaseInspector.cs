@@ -8,7 +8,7 @@ namespace SpellBoundAR.SceneManagement.Editor
     {
         protected override void RebuildLists()
         {
-            //Core.Editor.Helpers.FillWithAssetsOfType(((Database) target).Scenes.list, target);
+            Utilities.FillWithAssetsOfType(((Database) target).Scenes.list, target);
         }
 
         protected override void SortLists()

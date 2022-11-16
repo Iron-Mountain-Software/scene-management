@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/SpellBoundAR-Packages/scene-management.git#readme",
   "dependencies": {
-    "com.spellboundar.asset-management": "1.0.0"
+    "com.spellboundar.asset-management": "1.0.1"
   }
 }
