@@ -18,17 +18,17 @@ namespace SpellBoundAR.SceneManagement.UI
             else UnityEngine.SceneManagement.SceneManager.LoadScene(sceneData.name);
         }
         
-        private void Awake()
+        protected virtual void Awake()
         {
             _button = GetComponent<Button>();
         }
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             if (_button) _button.onClick.AddListener(OnClick);
         }
 
-        private void OnDisable()
+        protected virtual void OnDisable()
         {
             if (_button) _button.onClick.RemoveListener(OnClick);
         }
