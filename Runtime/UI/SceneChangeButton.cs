@@ -4,15 +4,19 @@ using UnityEngine.UI;
 namespace SpellBoundAR.SceneManagement.UI
 {
     [RequireComponent(typeof(Button))]
-    public class SceneChangeButton : MonoBehaviour
+    public abstract class SceneChangeButton : MonoBehaviour
     {
-        [Header("Settings")]
-        [SerializeField] private SceneData sceneData;
-
         [Header("Cache")]
         private Button _button;
-
-        public SceneData SceneData => sceneData;
+        
+        protected abstract void OnClick();
+        
+        protected void LoadScene(SceneData sceneData)
+        {
+            if (!sceneData) return;
+            if (SceneManager.Instance) SceneManager.Instance.LoadScene(sceneData);
+            else UnityEngine.SceneManagement.SceneManager.LoadScene(sceneData.name);
+        }
         
         private void Awake()
         {
@@ -27,13 +31,6 @@ namespace SpellBoundAR.SceneManagement.UI
         private void OnDisable()
         {
             if (_button) _button.onClick.RemoveListener(OnClick);
-        }
-
-        protected virtual void OnClick() 
-        {
-            if (!sceneData) return;
-            if (SceneManager.Instance) SceneManager.Instance.LoadScene(sceneData);
-            else UnityEngine.SceneManagement.SceneManager.LoadScene(sceneData.name);
         }
     }
 }
