@@ -9,9 +9,6 @@ namespace SpellBoundAR.SceneManagement.UI
 
         public SceneData SceneData => sceneData;
 
-        protected override void OnClick()
-        {
-            LoadScene(sceneData);
-        }
+        protected override void OnClick() => LoadScene(sceneData);
     }
 }
