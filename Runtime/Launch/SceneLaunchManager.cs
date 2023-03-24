@@ -1,22 +1,37 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace SpellBoundAR.SceneManagement
+namespace SpellBoundAR.SceneManagement.Launch
 {
     public class SceneLaunchManager : SceneChanger
     {
+        public event Action OnCurrentPluginChanged;
+        
         [Header("References")]
         [SerializeField] private SceneData defaultScene;
         [SerializeField] private float pluginTimeout = 15;
 
         [Header("Cache")]
         private float _startTime;
+        private ISceneLaunchPlugin _currentPlugin;
 
         private bool HasTimedOut => Time.unscaledTime - _startTime > pluginTimeout;
-        
-        IEnumerator Start()
+
+        public ISceneLaunchPlugin CurrentPlugin
+        {
+            get => _currentPlugin;
+            private set
+            {
+                if (_currentPlugin == value) return;
+                _currentPlugin = value;
+                OnCurrentPluginChanged?.Invoke();
+            }
+        }
+
+        private IEnumerator Start()
         {
             _startTime = Time.unscaledTime;
             List<ISceneLaunchPlugin> plugins = GetComponentsInChildren<ISceneLaunchPlugin>().ToList();
@@ -24,17 +39,19 @@ namespace SpellBoundAR.SceneManagement
             foreach (ISceneLaunchPlugin plugin in plugins)
             {
                 if (plugin == null) continue;
+                CurrentPlugin = plugin;
                 do
                 {
-                    if (plugin == null) break;
-                    if (plugin.IsReady)
+                    if (CurrentPlugin == null) break;
+                    if (CurrentPlugin.IsReady)
                     {
-                        if (!plugin.SceneToLaunch) break;
-                        LoadScene(plugin.SceneToLaunch);
+                        if (!CurrentPlugin.SceneToLaunch) break;
+                        LoadScene(CurrentPlugin.SceneToLaunch);
                         yield break;
                     }
                     yield return null;
                 } while (!HasTimedOut);
+                CurrentPlugin = null;
             }
             LoadScene(defaultScene);
         }

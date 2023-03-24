@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SpellBoundAR.AssetManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace SpellBoundAR.SceneManagement
 {
@@ -23,13 +24,25 @@ namespace SpellBoundAR.SceneManagement
                 List<string> dependencies = new List<string>();
                 foreach (SceneList sceneList in dependencyLists)
                 {
+                    if (!sceneList) continue;
                     foreach (string sceneName in sceneList.SceneNames)
                     {
-                        if (!dependencies.Contains(sceneName)) dependencies.Add(sceneName);
+                        if (string.IsNullOrWhiteSpace(sceneName) 
+                            || dependencies.Contains(sceneName)) continue;
+                        dependencies.Add(sceneName);
                     }
                 }
                 return dependencies;
             }
+        }
+
+        public bool DependsOn(Scene scene)
+        {
+            foreach (SceneList sceneList in dependencyLists)
+            {
+                if (sceneList && sceneList.SceneNames.Contains(scene.name)) return true;
+            }
+            return false;
         }
 
         public virtual void ActivateSettings()

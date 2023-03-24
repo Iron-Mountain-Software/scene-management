@@ -23,23 +23,20 @@ namespace SpellBoundAR.SceneManagement
         
         [Header("Static Settings")]
         private static readonly string TemporaryScene = "Temporary Scene: ";
-        public static readonly float SceneFadeInSeconds = .5f;
-        public static readonly float SceneFadeOutSeconds = .5f;
 
-        private static readonly WaitForSecondsRealtime FadeIn = new (SceneFadeInSeconds);
-        private static readonly WaitForSecondsRealtime FadeOut = new (SceneFadeOutSeconds);
-        
         [Header("References")]
         [SerializeField] private Database sceneDatabase;
+        [SerializeField] private float sceneFadeInSeconds;
+        [SerializeField] private float sceneFadeOutSeconds;
         
         [Header("Cache")]
         private State _state = State.None;
-        private readonly List<string> _dependenciesKeptLoaded = new ();
-        private readonly List<AsyncOperation> _sceneLoadingOperations = new ();
-        private readonly List<AsyncOperation> _sceneUnloadingOperations = new ();
+        private SceneData _destinationScene;
 
         public Database SceneDatabase => sceneDatabase;
         public float Progress { get; private set; }
+        public float SceneFadeInSeconds => sceneFadeInSeconds;
+        public float SceneFadeOutSeconds => sceneFadeOutSeconds;
 
         public State CurrentState
         {
@@ -90,9 +87,9 @@ namespace SpellBoundAR.SceneManagement
             SceneData loadedSceneData = sceneDatabase.FindSceneByName(loadedScene.name);
             if (!loadedSceneData) return;
             loadedSceneData.OnThisSceneLoaded();
-            Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-            if (loadedScene != activeScene)
+            if (_destinationScene && _destinationScene.Name == loadedScene.name)
             {
+                _destinationScene = null;
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene(loadedScene);
                 UnloadAllTemporaryScenes();
             }
@@ -107,88 +104,118 @@ namespace SpellBoundAR.SceneManagement
 
         public void LoadLoginScene()
         {
-            StopAllCoroutines();
-            StartCoroutine(LoadSceneRunner(sceneDatabase.LoginScene));
+            LoadScene(sceneDatabase.LoginScene);
         }
-
-        public void LoadScene(SceneData scene)
-        {
-            if (!scene) return;
-            StopAllCoroutines();
-            StartCoroutine(LoadSceneRunner(scene));
-        }
-
+        
         public void LoadSceneByName(string sceneName)
         {
-            StopAllCoroutines();
             SceneData sceneData = sceneDatabase.FindSceneByName(sceneName);
-            StartCoroutine(LoadSceneRunner(sceneData ? sceneData : sceneDatabase.FirstGameScene));
+            LoadScene(sceneData ? sceneData : sceneDatabase.FirstGameScene);
         }
         
         public void LoadSceneByID(string id)
         {
-            StopAllCoroutines();
             SceneData sceneData = sceneDatabase.Scenes.GetElementByID(id);
-            StartCoroutine(LoadSceneRunner(sceneData ? sceneData : sceneDatabase.FirstGameScene));
+            LoadScene(sceneData ? sceneData : sceneDatabase.FirstGameScene);
         }
-
+        
+        public void LoadScene(SceneData scene)
+        {
+            if (CurrentState != State.None) return;
+            if (!scene) return;
+            StopAllCoroutines();
+            StartCoroutine(LoadSceneRunner(scene));
+        }
+        
         private IEnumerator LoadSceneRunner(SceneData sceneDataToLoad)
         {
+            float startTime = Time.unscaledTime;
+            _destinationScene = sceneDataToLoad;
             CurrentState = State.FadingOutToLoad;
-            yield return FadeOut;
+            
+            if (sceneFadeOutSeconds > 0) yield return new WaitForSecondsRealtime(sceneFadeOutSeconds);
+            
             Screen.orientation = ScreenOrientation.Portrait;
             sceneDataToLoad.ActivateSettings();
             CurrentState = State.Loading;
-            CreateEmptyTemporaryScene();
-            _dependenciesKeptLoaded.Clear();
-            _sceneLoadingOperations.Clear();
-            _sceneUnloadingOperations.Clear();
+
+            bool destinationSceneAlreadyLoaded = false;
+            List<string> scenesKeptLoaded = new ();
+            List<string> scenesToUnload = new ();
             for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
             {
                 Scene scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
-                bool isDependency = sceneDataToLoad.Dependencies.Find(test => test == scene.name) != null;
-                if (isDependency)
+                if (sceneDataToLoad.name.Equals(scene.name))
                 {
-                    _dependenciesKeptLoaded.Add(scene.name);
+                    destinationSceneAlreadyLoaded = true;
+                    UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
+                    UnloadAllTemporaryScenes();
                 }
-                else if (!scene.name.Contains(TemporaryScene))
+                else if (sceneDataToLoad.DependsOn(scene))
                 {
-                    AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(scene.name);
-                    _sceneUnloadingOperations.Add(operation);
+                    scenesKeptLoaded.Add(scene.name);
                 }
+                else scenesToUnload.Add(scene.name);
             }
-            AsyncOperation mainOperation =
-                UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneDataToLoad.name, LoadSceneMode.Additive);
-            mainOperation.allowSceneActivation = false;
-            _sceneLoadingOperations.Add(mainOperation);
+            
+            List<AsyncOperation> sceneLoadingOperations = new ();
+
+            if (!destinationSceneAlreadyLoaded)
+            {
+                CreateEmptyTemporaryScene();
+            }
+            
+            List<AsyncOperation> sceneUnloadingOperations = new ();
+            foreach (string sceneToUnload in scenesToUnload)
+            {
+                AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(sceneToUnload);
+                sceneUnloadingOperations.Add(operation);
+            }
+
+            if (!destinationSceneAlreadyLoaded)
+            {
+                AsyncOperation mainOperation =
+                    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneDataToLoad.name, LoadSceneMode.Additive);
+                mainOperation.allowSceneActivation = false;
+                sceneLoadingOperations.Add(mainOperation);
+            }
+
             foreach (string dependency in sceneDataToLoad.Dependencies)
             {
-                if (_dependenciesKeptLoaded.Contains(dependency)) continue;
+                if (dependency == sceneDataToLoad.Name) continue;
+                if (scenesKeptLoaded.Contains(dependency)) continue;
                 AsyncOperation operation =
                     UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(dependency, LoadSceneMode.Additive);
                 operation.allowSceneActivation = false;
-                _sceneLoadingOperations.Add(operation);
+                sceneLoadingOperations.Add(operation);
             }
+            
             Progress = 0;
             while (Progress < 1)
             {
                 float progressCounter = 0f;
-                for (int i = 0; i < _sceneUnloadingOperations.Count; i++) progressCounter += _sceneUnloadingOperations[i].progress;
-                for (int i = 0; i < _sceneLoadingOperations.Count; i++) progressCounter += _sceneLoadingOperations[i].progress;
-                float unscaledProgress = progressCounter / (_sceneUnloadingOperations.Count + _sceneLoadingOperations.Count);
+                for (int i = 0; i < sceneUnloadingOperations.Count; i++) progressCounter += sceneUnloadingOperations[i].progress;
+                for (int i = 0; i < sceneLoadingOperations.Count; i++) progressCounter += sceneLoadingOperations[i].progress;
+                float unscaledProgress = progressCounter / (sceneUnloadingOperations.Count + sceneLoadingOperations.Count);
                 Progress = Mathf.Clamp01(unscaledProgress / .9f);
                 yield return null;
             }
+            
             CurrentState = State.FadingOutToNew;
-            yield return FadeOut;
+            
+            if (sceneFadeOutSeconds > 0) yield return new WaitForSecondsRealtime(sceneFadeOutSeconds);
+
             Screen.orientation = sceneDataToLoad.ScreenOrientation;
-            foreach (AsyncOperation operation in _sceneLoadingOperations)
+            foreach (AsyncOperation operation in sceneLoadingOperations)
             {
                 operation.allowSceneActivation = true;
             }
             CurrentState = State.FadingInToNew;
-            yield return FadeIn;
+            
+            if (sceneFadeInSeconds > 0) yield return new WaitForSecondsRealtime(sceneFadeInSeconds);
+            
             CurrentState = State.None;
+            Debug.Log("Loaded in: " + (Time.unscaledTime - startTime));
         }
 
         private void CreateEmptyTemporaryScene()
@@ -219,6 +246,8 @@ namespace SpellBoundAR.SceneManagement
         private void OnValidate()
         {
             if (!sceneDatabase) RefreshSceneDatabase();
+            if (sceneFadeInSeconds < 0) sceneFadeInSeconds = 0;
+            if (sceneFadeOutSeconds < 0) sceneFadeOutSeconds = 0;
         }
 
         [ContextMenu("Refresh Scene Database")]
