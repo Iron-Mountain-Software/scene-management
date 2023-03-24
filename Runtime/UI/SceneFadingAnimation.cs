@@ -31,7 +31,7 @@ namespace SpellBoundAR.SceneManagement.UI
                           && SceneManager.Instance.CurrentState
                               is SceneManager.State.FadingOutToLoad
                               or SceneManager.State.Loading
-                              or SceneManager.State.FadingOutToNew
+                              or SceneManager.State.Activating
                               or SceneManager.State.FadingInToNew;
             gameObject.SetActive(active);
             if (!active) return;
@@ -46,7 +46,7 @@ namespace SpellBoundAR.SceneManagement.UI
                     StopAllCoroutines();
                     StartCoroutine(FadeBlack(1, 0, SceneManager.Instance.LoadingSceneFadeInSeconds));
                     break;
-                case SceneManager.State.FadingOutToNew:
+                case SceneManager.State.Activating:
                     StopAllCoroutines();
                     StartCoroutine(FadeBlack(0, 1, SceneManager.Instance.LoadingSceneFadeOutSeconds));
                     break;

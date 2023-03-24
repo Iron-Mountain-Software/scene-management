@@ -13,7 +13,7 @@ namespace SpellBoundAR.SceneManagement
             None,
             FadingOutToLoad,
             Loading,
-            FadingOutToNew,
+            Activating,
             FadingInToNew
         }
 
@@ -125,7 +125,7 @@ namespace SpellBoundAR.SceneManagement
         
         public void LoadScene(SceneData scene)
         {
-            if (CurrentState != State.None) return;
+            if (CurrentState is State.Loading or State.Activating) return;
             if (!scene) return;
             StopAllCoroutines();
             StartCoroutine(LoadSceneRunner(scene));
@@ -133,16 +133,17 @@ namespace SpellBoundAR.SceneManagement
         
         private IEnumerator LoadSceneRunner(SceneData sceneDataToLoad)
         {
-            float startTime = Time.unscaledTime;
-            _destinationScene = sceneDataToLoad;
             CurrentState = State.FadingOutToLoad;
             
             if (gameSceneFadeOutSeconds > 0) yield return new WaitForSecondsRealtime(gameSceneFadeOutSeconds);
-            
-            Screen.orientation = ScreenOrientation.Portrait;
-            sceneDataToLoad.ActivateSettings();
+
             CurrentState = State.Loading;
 
+            _destinationScene = sceneDataToLoad;
+            _destinationScene.ActivateSettings();
+            
+            Screen.orientation = ScreenOrientation.Portrait;
+            
             bool destinationSceneAlreadyLoaded = false;
             List<string> scenesKeptLoaded = new ();
             List<string> scenesToUnload = new ();
@@ -205,7 +206,7 @@ namespace SpellBoundAR.SceneManagement
                 yield return null;
             }
             
-            CurrentState = State.FadingOutToNew;
+            CurrentState = State.Activating;
             
             if (loadingSceneFadeOutSeconds > 0) yield return new WaitForSecondsRealtime(loadingSceneFadeOutSeconds);
 

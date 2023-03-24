@@ -12,7 +12,7 @@ namespace SpellBoundAR.SceneManagement.UI
         private void RefreshState()
         {
             gameObject.SetActive(
-                SceneManager.Instance.CurrentState is SceneManager.State.Loading or SceneManager.State.FadingOutToNew
+                SceneManager.Instance.CurrentState is SceneManager.State.Loading or SceneManager.State.Activating
             );
         }
     }
