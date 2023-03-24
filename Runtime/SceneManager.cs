@@ -26,17 +26,21 @@ namespace SpellBoundAR.SceneManagement
 
         [Header("References")]
         [SerializeField] private Database sceneDatabase;
-        [SerializeField] private float sceneFadeInSeconds;
-        [SerializeField] private float sceneFadeOutSeconds;
-        
+        [SerializeField] private float gameSceneFadeOutSeconds;
+        [SerializeField] private float loadingSceneFadeInSeconds;
+        [SerializeField] private float loadingSceneFadeOutSeconds;
+        [SerializeField] private float gameSceneFadeInSeconds;
+
         [Header("Cache")]
         private State _state = State.None;
         private SceneData _destinationScene;
 
         public Database SceneDatabase => sceneDatabase;
         public float Progress { get; private set; }
-        public float SceneFadeInSeconds => sceneFadeInSeconds;
-        public float SceneFadeOutSeconds => sceneFadeOutSeconds;
+        public float GameSceneFadeOutSeconds => gameSceneFadeOutSeconds;
+        public float LoadingSceneFadeInSeconds => loadingSceneFadeInSeconds;
+        public float LoadingSceneFadeOutSeconds => loadingSceneFadeOutSeconds;
+        public float GameSceneFadeInSeconds => gameSceneFadeInSeconds;
 
         public State CurrentState
         {
@@ -133,7 +137,7 @@ namespace SpellBoundAR.SceneManagement
             _destinationScene = sceneDataToLoad;
             CurrentState = State.FadingOutToLoad;
             
-            if (sceneFadeOutSeconds > 0) yield return new WaitForSecondsRealtime(sceneFadeOutSeconds);
+            if (gameSceneFadeOutSeconds > 0) yield return new WaitForSecondsRealtime(gameSceneFadeOutSeconds);
             
             Screen.orientation = ScreenOrientation.Portrait;
             sceneDataToLoad.ActivateSettings();
@@ -203,19 +207,19 @@ namespace SpellBoundAR.SceneManagement
             
             CurrentState = State.FadingOutToNew;
             
-            if (sceneFadeOutSeconds > 0) yield return new WaitForSecondsRealtime(sceneFadeOutSeconds);
+            if (loadingSceneFadeOutSeconds > 0) yield return new WaitForSecondsRealtime(loadingSceneFadeOutSeconds);
 
             Screen.orientation = sceneDataToLoad.ScreenOrientation;
             foreach (AsyncOperation operation in sceneLoadingOperations)
             {
                 operation.allowSceneActivation = true;
             }
+            
             CurrentState = State.FadingInToNew;
             
-            if (sceneFadeInSeconds > 0) yield return new WaitForSecondsRealtime(sceneFadeInSeconds);
+            if (gameSceneFadeInSeconds > 0) yield return new WaitForSecondsRealtime(gameSceneFadeInSeconds);
             
             CurrentState = State.None;
-            Debug.Log("Loaded in: " + (Time.unscaledTime - startTime));
         }
 
         private void CreateEmptyTemporaryScene()
@@ -246,8 +250,10 @@ namespace SpellBoundAR.SceneManagement
         private void OnValidate()
         {
             if (!sceneDatabase) RefreshSceneDatabase();
-            if (sceneFadeInSeconds < 0) sceneFadeInSeconds = 0;
-            if (sceneFadeOutSeconds < 0) sceneFadeOutSeconds = 0;
+            if (gameSceneFadeOutSeconds < 0) gameSceneFadeOutSeconds = 0;
+            if (loadingSceneFadeInSeconds < 0) loadingSceneFadeInSeconds = 0;
+            if (loadingSceneFadeOutSeconds < 0) loadingSceneFadeOutSeconds = 0;
+            if (gameSceneFadeInSeconds < 0) gameSceneFadeInSeconds = 0;
         }
 
         [ContextMenu("Refresh Scene Database")]

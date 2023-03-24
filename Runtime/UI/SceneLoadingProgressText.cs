@@ -15,7 +15,10 @@ namespace SpellBoundAR.SceneManagement.UI
 
         private void Update()
         {
-            _text.text = Mathf.Round(SceneManager.Instance.Progress * 100f) + "%";
+            if (!_text) return;
+            _text.text = SceneManager.Instance 
+                ? Mathf.Round(SceneManager.Instance.Progress * 100f) + "%"
+                : "-1%";
         }
     }
 }

@@ -40,20 +40,20 @@ namespace SpellBoundAR.SceneManagement.UI
                 case SceneManager.State.FadingOutToLoad:
                     _canvasGroup.alpha = 0f;
                     StopAllCoroutines();
-                    StartCoroutine(FadeBlack(0, 1, SceneManager.Instance.SceneFadeOutSeconds));
+                    StartCoroutine(FadeBlack(0, 1, SceneManager.Instance.GameSceneFadeOutSeconds));
                     break;
                 case SceneManager.State.Loading:
                     StopAllCoroutines();
-                    StartCoroutine(FadeBlack(1, 0, SceneManager.Instance.SceneFadeInSeconds));
+                    StartCoroutine(FadeBlack(1, 0, SceneManager.Instance.LoadingSceneFadeInSeconds));
                     break;
                 case SceneManager.State.FadingOutToNew:
                     StopAllCoroutines();
-                    StartCoroutine(FadeBlack(0, 1, SceneManager.Instance.SceneFadeOutSeconds));
+                    StartCoroutine(FadeBlack(0, 1, SceneManager.Instance.LoadingSceneFadeOutSeconds));
                     break;
                 case SceneManager.State.FadingInToNew:
                     _canvasGroup.alpha = 1f;
                     StopAllCoroutines();
-                    StartCoroutine(FadeBlack(1, 0, SceneManager.Instance.SceneFadeInSeconds));
+                    StartCoroutine(FadeBlack(1, 0, SceneManager.Instance.GameSceneFadeInSeconds));
                     break;
             }
         }

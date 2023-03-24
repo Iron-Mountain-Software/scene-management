@@ -1,6 +1,6 @@
 {
   "name": "com.spellboundar.scene-management",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "displayName": "Scene Management",
   "description": "Makes working with scenes easier.",
   "unity": "2019.1",
@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/SpellBoundAR-Packages/scene-management.git#readme",
   "dependencies": {
-    "com.spellboundar.asset-management": "1.0.1"
+    "com.spellboundar.asset-management": "1.0.2"
   }
 }
