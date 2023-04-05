@@ -10,11 +10,12 @@ namespace SpellBoundAR.SceneManagement.Launch
     {
         public event Action OnCurrentPluginChanged;
         
-        [Header("References")]
+        [SerializeField] private bool launchOnStart;
         [SerializeField] private SceneData defaultScene;
         [SerializeField] private float pluginTimeout = 15;
 
         [Header("Cache")]
+        private bool _launching;
         private float _startTime;
         private ISceneLaunchPlugin _currentPlugin;
 
@@ -31,8 +32,27 @@ namespace SpellBoundAR.SceneManagement.Launch
             }
         }
 
-        private IEnumerator Start()
+        public bool Launching => _launching;
+
+        private void Start()
         {
+            if (launchOnStart) Launch();
+        }
+
+        public void Launch()
+        {
+            if (_launching) return;
+            StartCoroutine(LaunchRunner());
+        }
+
+        private void OnDisable()
+        {
+            _launching = false;
+        }
+
+        private IEnumerator LaunchRunner()
+        {
+            _launching = true;
             _startTime = Time.unscaledTime;
             List<ISceneLaunchPlugin> plugins = GetComponentsInChildren<ISceneLaunchPlugin>().ToList();
             plugins.Sort((pluginA, pluginB) => pluginA.Priority.CompareTo(pluginB.Priority));
@@ -47,6 +67,7 @@ namespace SpellBoundAR.SceneManagement.Launch
                     {
                         if (!CurrentPlugin.SceneToLaunch) break;
                         LoadScene(CurrentPlugin.SceneToLaunch);
+                        _launching = false;
                         yield break;
                     }
                     yield return null;
@@ -54,6 +75,7 @@ namespace SpellBoundAR.SceneManagement.Launch
                 CurrentPlugin = null;
             }
             LoadScene(defaultScene);
+            _launching = false;
         }
     }
 }

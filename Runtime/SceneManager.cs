@@ -150,13 +150,13 @@ namespace SpellBoundAR.SceneManagement
             for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
             {
                 Scene scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
-                if (sceneDataToLoad.name.Equals(scene.name))
+                if (_destinationScene.name.Equals(scene.name))
                 {
                     destinationSceneAlreadyLoaded = true;
                     UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
                     UnloadAllTemporaryScenes();
                 }
-                else if (sceneDataToLoad.DependsOn(scene))
+                else if (_destinationScene.DependsOn(scene))
                 {
                     scenesKeptLoaded.Add(scene.name);
                 }
@@ -173,6 +173,7 @@ namespace SpellBoundAR.SceneManagement
             List<AsyncOperation> sceneUnloadingOperations = new ();
             foreach (string sceneToUnload in scenesToUnload)
             {
+                if (string.IsNullOrWhiteSpace(sceneToUnload)) continue;
                 AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(sceneToUnload);
                 sceneUnloadingOperations.Add(operation);
             }
@@ -180,14 +181,15 @@ namespace SpellBoundAR.SceneManagement
             if (!destinationSceneAlreadyLoaded)
             {
                 AsyncOperation mainOperation =
-                    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneDataToLoad.name, LoadSceneMode.Additive);
+                    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(_destinationScene.name, LoadSceneMode.Additive);
                 mainOperation.allowSceneActivation = false;
                 sceneLoadingOperations.Add(mainOperation);
             }
 
-            foreach (string dependency in sceneDataToLoad.Dependencies)
+            foreach (string dependency in _destinationScene.Dependencies)
             {
-                if (dependency == sceneDataToLoad.Name) continue;
+                if (string.IsNullOrWhiteSpace(dependency)) continue;
+                if (dependency == _destinationScene.Name) continue;
                 if (scenesKeptLoaded.Contains(dependency)) continue;
                 AsyncOperation operation =
                     UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(dependency, LoadSceneMode.Additive);
@@ -210,7 +212,7 @@ namespace SpellBoundAR.SceneManagement
             
             if (loadingSceneFadeOutSeconds > 0) yield return new WaitForSecondsRealtime(loadingSceneFadeOutSeconds);
 
-            Screen.orientation = sceneDataToLoad.ScreenOrientation;
+            Screen.orientation = _destinationScene.ScreenOrientation;
             foreach (AsyncOperation operation in sceneLoadingOperations)
             {
                 operation.allowSceneActivation = true;
