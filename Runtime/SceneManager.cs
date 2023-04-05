@@ -201,9 +201,20 @@ namespace SpellBoundAR.SceneManagement
             while (Progress < 1)
             {
                 float progressCounter = 0f;
-                for (int i = 0; i < sceneUnloadingOperations.Count; i++) progressCounter += sceneUnloadingOperations[i].progress;
-                for (int i = 0; i < sceneLoadingOperations.Count; i++) progressCounter += sceneLoadingOperations[i].progress;
-                float unscaledProgress = progressCounter / (sceneUnloadingOperations.Count + sceneLoadingOperations.Count);
+                int processes = 0;
+                for (int i = 0; i < sceneUnloadingOperations.Count; i++)
+                {
+                    if (sceneUnloadingOperations[i] == null) continue;
+                    progressCounter += sceneUnloadingOperations[i].progress;
+                    processes++;
+                }
+                for (int i = 0; i < sceneLoadingOperations.Count; i++)
+                {
+                    if (sceneLoadingOperations[i] == null) continue;
+                    progressCounter += sceneLoadingOperations[i].progress;
+                    processes++;
+                }
+                float unscaledProgress = progressCounter / processes;
                 Progress = Mathf.Clamp01(unscaledProgress / .9f);
                 yield return null;
             }
