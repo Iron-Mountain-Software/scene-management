@@ -10,7 +10,7 @@ namespace SpellBoundAR.SceneManagement.Launch
     {
         public event Action OnCurrentPluginChanged;
         
-        [SerializeField] private bool launchOnStart;
+        [SerializeField] private bool launchOnStart = true;
         [SerializeField] private SceneData defaultScene;
         [SerializeField] private float pluginTimeout = 15;
 

@@ -18,9 +18,12 @@ namespace SpellBoundAR.SceneManagement.Editor
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
-            EditorGUI.BeginDisabledGroup(_sceneLaunchManager && _sceneLaunchManager.Launching);
-            if (GUILayout.Button("Launch", GUILayout.MinHeight(30))) _sceneLaunchManager.Launch();
-            EditorGUI.EndDisabledGroup();
+            if (Application.isPlaying)
+            {
+                EditorGUI.BeginDisabledGroup(_sceneLaunchManager && _sceneLaunchManager.Launching);
+                if (GUILayout.Button("Launch", GUILayout.MinHeight(30))) _sceneLaunchManager.Launch();
+                EditorGUI.EndDisabledGroup();
+            }
         }
     }
 }
