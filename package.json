@@ -1,6 +1,6 @@
 {
   "name": "com.spellboundar.scene-management",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "displayName": "Scene Management",
   "description": "Makes working with scenes easier.",
   "unity": "2019.1",
