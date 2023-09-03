@@ -37,7 +37,7 @@ namespace SpellBoundAR.SceneManagement.UI
 #elif (UNITY_STANDALONE) 
             Application.Quit();
 #elif (UNITY_WEBGL)
-            Application.OpenURL(webGLRedirect);
+            Application.OpenURL(webGLUrlRedirect);
 #endif
         }
     }
