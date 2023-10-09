@@ -21,10 +21,8 @@ namespace SpellBoundAR.SceneManagement
         
         public static event Action OnStateChanged;
         
-        [Header("Static Settings")]
         private static readonly string TemporaryScene = "Temporary Scene: ";
 
-        [Header("References")]
         [SerializeField] private Database sceneDatabase;
         [SerializeField] private float gameSceneFadeOutSeconds;
         [SerializeField] private float loadingSceneFadeInSeconds;

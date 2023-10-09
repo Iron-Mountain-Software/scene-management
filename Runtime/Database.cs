@@ -6,7 +6,6 @@ namespace SpellBoundAR.SceneManagement
     [CreateAssetMenu(menuName = "Scriptable Objects/Core/Scene Management/Database")]
     public class Database : SingletonDatabase<Database>
     {
-        [Header("References:")]
         [SerializeField] private SceneData loginScene;
         [SerializeField] private SceneData firstGameScene;
         public SceneData LoginScene => loginScene;
