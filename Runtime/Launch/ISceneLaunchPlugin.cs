@@ -1,6 +1,6 @@
 using System;
 
-namespace SpellBoundAR.SceneManagement.Launch
+namespace IronMountain.SceneManagement.Launch
 {
     public interface ISceneLaunchPlugin
     {

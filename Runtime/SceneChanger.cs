@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SpellBoundAR.SceneManagement
+namespace IronMountain.SceneManagement
 {
     public class SceneChanger : MonoBehaviour
     {

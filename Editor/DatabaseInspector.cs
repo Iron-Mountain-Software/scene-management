@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace SpellBoundAR.SceneManagement.Editor
+namespace IronMountain.SceneManagement.Editor
 {
     [CustomEditor(typeof(Database), true)]
     public class DatabaseInspector : UnityEditor.Editor

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SpellBoundAR.SceneManagement.Launch.UI
+namespace IronMountain.SceneManagement.Launch.UI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Text))]

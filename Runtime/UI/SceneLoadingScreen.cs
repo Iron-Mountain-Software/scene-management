@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SpellBoundAR.SceneManagement.UI
+namespace IronMountain.SceneManagement.UI
 {
     public class SceneLoadingScreen : MonoBehaviour
     {

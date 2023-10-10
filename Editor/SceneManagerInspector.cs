@@ -1,7 +1,6 @@
-using System;
 using UnityEditor;
 
-namespace SpellBoundAR.SceneManagement.Editor
+namespace IronMountain.SceneManagement.Editor
 {
     [CustomEditor(typeof(SceneManager), true)]
     public class SceneManagerInspector : UnityEditor.Editor

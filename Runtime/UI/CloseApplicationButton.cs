@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SpellBoundAR.SceneManagement.UI
+namespace IronMountain.SceneManagement.UI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Button))]

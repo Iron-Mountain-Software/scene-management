@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace SpellBoundAR.SceneManagement.Launch
+namespace IronMountain.SceneManagement.Launch
 {
     public class RuntimePlatformSceneLaunchPlugin : MonoBehaviour, ISceneLaunchPlugin
     {

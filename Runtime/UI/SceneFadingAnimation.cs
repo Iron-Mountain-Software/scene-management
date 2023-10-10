@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace SpellBoundAR.SceneManagement.UI
+namespace IronMountain.SceneManagement.UI
 {
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]

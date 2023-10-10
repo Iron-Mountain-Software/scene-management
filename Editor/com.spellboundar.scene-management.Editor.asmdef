@@ -1,9 +1,7 @@
 {
-    "name": "com.spellboundar.scene-management.Editor",
-    "rootNamespace": "SpellBoundAR.SceneManagement",
+    "name": "com.iron-mountain.scene-management.Editor",
+    "rootNamespace": "IronMountain.SceneManagement",
     "references": [
-        "GUID:34f818b22e8004c0a83e30ac9b4e6722",
-        "GUID:039a95f226092450bb817be2ae938a01",
         "GUID:48360507665e04060aaeb40b15d596e4"
     ],
     "includePlatforms": [

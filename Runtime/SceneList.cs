@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace SpellBoundAR.SceneManagement
+namespace IronMountain.SceneManagement
 {
     [CreateAssetMenu(menuName = "Scriptable Objects/Core/Scene Management/Scene List")]
     public class SceneList : ScriptableObject

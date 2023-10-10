@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace SpellBoundAR.SceneManagement
+namespace IronMountain.SceneManagement
 {
     public class SceneManager : MonoBehaviour
     {
