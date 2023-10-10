@@ -1,5 +1,4 @@
 using System.IO;
-using SpellBoundAR.AssetManagement.Editor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -7,7 +6,7 @@ using UnityEngine;
 namespace SpellBoundAR.SceneManagement.Editor
 {
     [CustomEditor(typeof(Database), true)]
-    public class DatabaseInspector : SingletonDatabaseInspector
+    public class DatabaseInspector : UnityEditor.Editor
     {
         private Database _database;
 
@@ -19,29 +18,42 @@ namespace SpellBoundAR.SceneManagement.Editor
         public override void OnInspectorGUI()
         {
             EditorGUILayout.Space();
-            EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Rebuild Lists"))
-                RebuildLists();
-            if (GUILayout.Button("Sort Lists"))
-                SortLists();
-            if (GUILayout.Button("Rebuild Dictionaries"))
-                RebuildDictionaries();
-            if (GUILayout.Button("Log & Copy Data"))
-                Debug.Log(EditorGUIUtility.systemCopyBuffer = ToString());
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.Space();
             
             EditorGUILayout.PropertyField(serializedObject.FindProperty("loginScene"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("firstGameScene"));
+            
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Rebuild Scene List"))
+            {
+                RebuildSceneList();
+            }
+            if (GUILayout.Button("Sort Scene List"))
+            {
+                _database.SortList();
+            }
+            if (GUILayout.Button("Rebuild Dictionary"))
+            {
+                _database.RebuildDictionary();
+            }
+            if (GUILayout.Button("Log & Copy Data"))
+            {
+                string data = _database.ToString();
+                EditorGUIUtility.systemCopyBuffer = data;
+                Debug.Log(data);
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
             SerializedProperty scenes = serializedObject.FindProperty("scenes");
             EditorGUILayout.PropertyField(scenes);
             EditorGUILayout.BeginVertical(GUILayout.MaxWidth(50));
-            if (scenes.isExpanded && scenes.FindPropertyRelative("list").isExpanded)
+            if (scenes.isExpanded)
             {
-                GUILayout.Space(EditorGUIUtility.singleLineHeight * 2.5f);
-                foreach (SceneData sceneData in _database.Scenes.list)
+                GUILayout.Space(EditorGUIUtility.singleLineHeight * 1.5f);
+                foreach (SceneData sceneData in _database.Scenes)
                 {
                     EditorGUI.BeginDisabledGroup(!sceneData);
                     if (GUILayout.Button("Load", GUILayout.MaxHeight(EditorGUIUtility.singleLineHeight)))
@@ -71,24 +83,19 @@ namespace SpellBoundAR.SceneManagement.Editor
             serializedObject.ApplyModifiedProperties();
         }
 
-        protected override void RebuildLists()
+        private void RebuildSceneList()
         {
-            Utilities.FillWithAssetsOfType(((Database) target).Scenes.list, target);
-        }
-
-        protected override void SortLists()
-        {
-            ((Database)target).Scenes.SortList();
-        }
-
-        protected override void RebuildDictionaries()
-        {
-            ((Database)target).Scenes.RebuildDictionary();
-        }
-        
-        public override string ToString()
-        {
-            return ((Database)target).Scenes.ToString("Scenes");
+            _database.Scenes.Clear();
+            string[] guids = AssetDatabase.FindAssets($"t:{typeof(SceneData)}");
+            for( int i = 0; i < guids.Length; i++ )
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath( guids[i] );
+                SceneData asset = AssetDatabase.LoadAssetAtPath<SceneData>( assetPath );
+                if (asset) _database.Scenes.Add(asset);
+            }
+            EditorUtility.SetDirty(_database);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
     }
 }

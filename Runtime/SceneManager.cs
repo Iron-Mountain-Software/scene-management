@@ -64,7 +64,7 @@ namespace SpellBoundAR.SceneManagement
                 UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
                 UnityEngine.SceneManagement.SceneManager.sceneUnloaded += OnSceneUnloaded;
                 Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-                SceneData currentSceneData = sceneDatabase.FindSceneByName(activeScene.name);
+                SceneData currentSceneData = sceneDatabase.GetSceneByName(activeScene.name);
                 if (currentSceneData)
                 {
                     currentSceneData.ActivateSettings();
@@ -86,7 +86,7 @@ namespace SpellBoundAR.SceneManagement
 
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode mode)
         {
-            SceneData loadedSceneData = sceneDatabase.FindSceneByName(loadedScene.name);
+            SceneData loadedSceneData = sceneDatabase.GetSceneByName(loadedScene.name);
             if (!loadedSceneData) return;
             loadedSceneData.OnThisSceneLoaded();
             if (_destinationScene && _destinationScene.Name == loadedScene.name)
@@ -99,7 +99,7 @@ namespace SpellBoundAR.SceneManagement
         
         private void OnSceneUnloaded(Scene unloadedScene)
         {
-            SceneData loadedSceneData = sceneDatabase.FindSceneByName(unloadedScene.name);
+            SceneData loadedSceneData = sceneDatabase.GetSceneByName(unloadedScene.name);
             if (!loadedSceneData) return;
             loadedSceneData.OnThisSceneUnloaded();
         }
@@ -111,13 +111,13 @@ namespace SpellBoundAR.SceneManagement
         
         public void LoadSceneByName(string sceneName)
         {
-            SceneData sceneData = sceneDatabase.FindSceneByName(sceneName);
+            SceneData sceneData = sceneDatabase.GetSceneByName(sceneName);
             LoadScene(sceneData ? sceneData : sceneDatabase.FirstGameScene);
         }
         
         public void LoadSceneByID(string id)
         {
-            SceneData sceneData = sceneDatabase.Scenes.GetElementByID(id);
+            SceneData sceneData = sceneDatabase.GetSceneByID(id);
             LoadScene(sceneData ? sceneData : sceneDatabase.FirstGameScene);
         }
         

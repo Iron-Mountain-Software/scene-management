@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace SpellBoundAR.SceneManagement
 {
-    
     public class LoadSceneAfterSeconds : SceneChanger
     {
         [SerializeField] private SceneData scene;

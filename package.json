@@ -1,6 +1,6 @@
 {
-  "name": "com.spellboundar.scene-management",
-  "version": "1.2.0",
+  "name": "com.iron-mountain.scene-management",
+  "version": "1.3.0",
   "displayName": "Scene Management",
   "description": "Makes working with scenes easier.",
   "unity": "2019.1",
@@ -9,7 +9,7 @@
     "tools",
     "scenes"
   ],
-  "author": "Chris Monteferrante <chris@spellboundar.com>",
+  "author": "Chris Monteferrante <ludachrismonte@gmail.com>",
   "type": "tool",
   "repository": {
     "type": "git",
@@ -19,8 +19,5 @@
   "bugs": {
     "url": "https://github.com/SpellBoundAR-Packages/scene-management.git/issues"
   },
-  "homepage": "https://github.com/SpellBoundAR-Packages/scene-management.git#readme",
-  "dependencies": {
-    "com.spellboundar.asset-management": "1.0.2"
-  }
+  "homepage": "https://github.com/SpellBoundAR-Packages/scene-management.git#readme"
 }

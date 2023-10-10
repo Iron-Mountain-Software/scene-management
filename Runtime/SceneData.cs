@@ -1,19 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
-using SpellBoundAR.AssetManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace SpellBoundAR.SceneManagement
 {
-    [CreateAssetMenu(menuName = "Scriptable Objects/Core/Scene Management/Scene Data")]
-    public class SceneData : IdentifiableScriptableObject
+    [CreateAssetMenu(menuName = "Scriptable Objects/Scene Management/Scene Data")]
+    public class SceneData : ScriptableObject
     {
-        [Header("Settings")]
+        [SerializeField] private string id;
         [SerializeField] private ScreenOrientation screenOrientation = ScreenOrientation.Portrait;
         [SerializeField] private float startTimeScale = 1f;
         [SerializeField] private List<SceneList> dependencyLists;
         
+        public string ID => id;
+        public virtual string Name => name;
         public ScreenOrientation ScreenOrientation => screenOrientation;
         public float StartTimeScale => startTimeScale;
 
@@ -55,10 +56,21 @@ namespace SpellBoundAR.SceneManagement
         public virtual void OnThisSceneUnloaded() { }
 
 #if UNITY_EDITOR
-
+        
+        public virtual void Reset()
+        {
+            GenerateNewID();
+        }
+        
         protected virtual void OnValidate()
         {
             PruneDependencies();
+        }
+        
+        [ContextMenu("Generate New ID")]
+        private void GenerateNewID()
+        {
+            id = UnityEditor.GUID.Generate().ToString();
         }
 
         [ContextMenu("Prune Dependencies")]
