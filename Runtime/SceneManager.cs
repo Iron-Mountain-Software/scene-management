@@ -50,6 +50,48 @@ namespace IronMountain.SceneManagement
                 OnStateChanged?.Invoke();
             }
         }
+        
+        public SceneData GetSceneByName(string sceneName)
+        {
+            return sceneDatabase ? sceneDatabase.GetSceneByName(sceneName) : null;
+        }
+        
+        public SceneData GetSceneByID(string id)
+        {
+            return sceneDatabase ? sceneDatabase.GetSceneByID(id) : null;
+        }
+        
+        public SceneData GetRandomScene()
+        {
+            return sceneDatabase ? sceneDatabase.GetRandomScene() : null;
+        }
+        
+        public void LoadLoginScene()
+        {
+            if (!sceneDatabase || !sceneDatabase.LoginScene) return;
+            LoadScene(sceneDatabase.LoginScene);
+        }
+        
+        public void LoadSceneByName(string sceneName)
+        {
+            SceneData sceneData = sceneDatabase ? sceneDatabase.GetSceneByName(sceneName) : null;
+            if (sceneData == null) sceneData = sceneDatabase ? sceneDatabase.FirstGameScene : null;
+            LoadScene(sceneData);
+        }
+        
+        public void LoadSceneByID(string id)
+        {
+            SceneData sceneData = sceneDatabase ? sceneDatabase.GetSceneByID(id) : null;
+            if (sceneData == null) sceneData = sceneDatabase ? sceneDatabase.FirstGameScene : null;
+            LoadScene(sceneData);
+        }
+        
+        public void LoadScene(SceneData scene)
+        {
+            if (!scene || CurrentState is State.Loading or State.Activating) return;
+            StopAllCoroutines();
+            StartCoroutine(LoadSceneRunner(scene));
+        }
 
         private void Awake()
         {
@@ -104,31 +146,6 @@ namespace IronMountain.SceneManagement
             loadedSceneData.OnThisSceneUnloaded();
         }
 
-        public void LoadLoginScene()
-        {
-            LoadScene(sceneDatabase.LoginScene);
-        }
-        
-        public void LoadSceneByName(string sceneName)
-        {
-            SceneData sceneData = sceneDatabase.GetSceneByName(sceneName);
-            LoadScene(sceneData ? sceneData : sceneDatabase.FirstGameScene);
-        }
-        
-        public void LoadSceneByID(string id)
-        {
-            SceneData sceneData = sceneDatabase.GetSceneByID(id);
-            LoadScene(sceneData ? sceneData : sceneDatabase.FirstGameScene);
-        }
-        
-        public void LoadScene(SceneData scene)
-        {
-            if (CurrentState is State.Loading or State.Activating) return;
-            if (!scene) return;
-            StopAllCoroutines();
-            StartCoroutine(LoadSceneRunner(scene));
-        }
-        
         private IEnumerator LoadSceneRunner(SceneData sceneDataToLoad)
         {
             CurrentState = State.FadingOutToLoad;
