@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace IronMountain.SceneManagement
 {
-    [CreateAssetMenu(menuName = "Scriptable Objects/Core/Scene Management/Scene List")]
+    [CreateAssetMenu(menuName = "Scriptable Objects/Scene Management/Scene List")]
     public class SceneList : ScriptableObject
     {
     
