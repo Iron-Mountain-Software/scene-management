@@ -172,7 +172,6 @@ namespace IronMountain.SceneManagement
 
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode mode)
         {
-            Debug.Log("OnSceneLoaded : " + loadedScene.name);
             SceneData loadedSceneData = sceneDatabase.GetSceneByName(loadedScene.name);
             if (!loadedSceneData) return;
             loadedSceneData.OnThisSceneLoaded();
