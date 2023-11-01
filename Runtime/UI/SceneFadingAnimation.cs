@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace IronMountain.SceneManagement.UI
+namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime.UI
 {
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]

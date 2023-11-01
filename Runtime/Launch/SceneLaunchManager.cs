@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace IronMountain.SceneManagement.Launch
+namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime.Launch
 {
     public class SceneLaunchManager : SceneChanger
     {

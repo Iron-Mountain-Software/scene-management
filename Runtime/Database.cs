@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace IronMountain.SceneManagement
+namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime
 {
     [CreateAssetMenu(menuName = "Scriptable Objects/Scene Management/Database")]
     public class Database : ScriptableObject

@@ -1,9 +1,10 @@
 using System.IO;
+using IronMountain.SceneManagement.Packages.Scene_Management.Runtime;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace IronMountain.SceneManagement.Editor
+namespace IronMountain.SceneManagement.Packages.Scene_Management.Editor
 {
     [CustomEditor(typeof(Database), true)]
     public class DatabaseInspector : UnityEditor.Editor

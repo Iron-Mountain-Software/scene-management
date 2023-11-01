@@ -1,6 +1,6 @@
 using System;
 
-namespace IronMountain.SceneManagement.Launch
+namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime.Launch
 {
     public interface ISceneLaunchPlugin
     {

@@ -1,23 +1,47 @@
 {
   "name": "com.iron-mountain.scene-management",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "displayName": "Scene Management",
-  "description": "A system for loading scenes, tracking scene dependencies, and storing scene metadata.",
+  "author": "Chris Monteferrante <ludachrismonte@gmail.com>",
   "unity": "2019.1",
+  "type": "tool",
+  "license": "MIT",
+  "homepage": "https://github.com/Iron-Mountain-Software/scene-management#readme",
+  "bugs": {
+    "type": "git",
+    "url": "https://github.com/Iron-Mountain-Software/scene-management/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Iron-Mountain-Software/scene-management"
+  },
+  "description": "A system for loading scenes, tracking scene dependencies, and storing scene metadata.",
+  "useCases": [
+    "Manage scene metadata, such as id, initial screen orientation, and initial Time.scale.",
+    "Load scenes with fade effects (fade old scene out, fade loading scene in, fade loading scene out, fade new scene in) ",
+    "Build loading screens with progress bars and percentage counters.  ",
+    "Manage scene dependencies and automatically load them when they're needed. ",
+    "Manage lists of scenes, and apply a list to the build settings."
+  ],
+  "directions": "SceneData\nScriptable Object that stores metadata about a scene.\nMust be named exactly the same as the scene it represents.\nCreate > Scriptable Objects > Scene Management > SceneData\nSceneDatabase\nStores all SceneData instances, and is used to rapidly switch between scenes.\nCreate > Scriptable Objects > Scene Management > Database\nSceneList\nA customizable list of SceneDatas.\nCreate > Scriptable Objects > Scene Management > SceneList\nSceneManager (singleton)\nAttach to a GameObject.\nUse this singleton to load scenes.",
   "keywords": [
     "resources",
     "tools",
     "scenes"
   ],
-  "author": "Chris Monteferrante <ludachrismonte@gmail.com>",
-  "type": "tool",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SpellBoundAR-Packages/scene-management.git"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/SpellBoundAR-Packages/scene-management.git/issues"
-  },
-  "homepage": "https://github.com/SpellBoundAR-Packages/scene-management.git#readme"
+  "sources": [
+    {
+      "type": "git",
+      "url": "https://github.com/Iron-Mountain-Software/scene-management"
+    },
+    {
+      "type": "npm",
+      "url": "https://www.npmjs.com/package/com.iron-mountain.scene-management"
+    },
+    {
+      "type": "itch.io",
+      "url": "https://iron-mountain.itch.io/scene-management"
+    }
+  ],
+  "dependencies": {}
 }

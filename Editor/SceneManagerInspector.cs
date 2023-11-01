@@ -1,6 +1,7 @@
+using IronMountain.SceneManagement.Packages.Scene_Management.Runtime;
 using UnityEditor;
 
-namespace IronMountain.SceneManagement.Editor
+namespace IronMountain.SceneManagement.Packages.Scene_Management.Editor
 {
     [CustomEditor(typeof(SceneManager), true)]
     public class SceneManagerInspector : UnityEditor.Editor

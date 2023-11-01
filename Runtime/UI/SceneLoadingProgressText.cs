@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace IronMountain.SceneManagement.UI
+namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime.UI
 {
     [RequireComponent(typeof(Text))]
     public class SceneLoadingProgressText : MonoBehaviour

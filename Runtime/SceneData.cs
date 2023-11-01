@@ -3,17 +3,27 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace IronMountain.SceneManagement
+namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime
 {
     [CreateAssetMenu(menuName = "Scriptable Objects/Scene Management/Scene Data")]
     public class SceneData : ScriptableObject
     {
+        
+#if UNITY_EDITOR
+        
+        [SerializeField] private UnityEditor.SceneAsset scene;
+        public UnityEditor.SceneAsset Scene => scene;
+        
+#endif
+        
         [SerializeField] private string id;
+        [SerializeField] private string path;
         [SerializeField] private ScreenOrientation screenOrientation = ScreenOrientation.Portrait;
         [SerializeField] private float startTimeScale = 1f;
         [SerializeField] private List<SceneList> dependencyLists;
         
         public string ID => id;
+        public string Path => path;
         public virtual string Name => name;
         public ScreenOrientation ScreenOrientation => screenOrientation;
         public float StartTimeScale => startTimeScale;
@@ -65,8 +75,9 @@ namespace IronMountain.SceneManagement
         protected virtual void OnValidate()
         {
             PruneDependencies();
+            path = UnityEditor.AssetDatabase.GetAssetPath(scene);
         }
-        
+
         [ContextMenu("Generate New ID")]
         private void GenerateNewID()
         {
