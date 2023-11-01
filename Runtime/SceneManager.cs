@@ -115,30 +115,36 @@ namespace IronMountain.SceneManagement
                 SceneData currentSceneData = sceneDatabase.GetSceneByName(activeScene.name);
                 if (currentSceneData)
                 {
-                    currentSceneData.ActivateSettings();
-
-                    List<string> loadedScenes = new();
-                    for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
-                    {
-                        loadedScenes.Add(UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).name);
-                    }
-
-                    foreach (string dependency in currentSceneData.Dependencies)
-                    {
-                        if (loadedScenes.Contains(dependency)) continue;
-                        if (Application.isPlaying)
-                        {
-                            UnityEngine.SceneManagement.SceneManager.LoadScene(dependency, LoadSceneMode.Additive);
-                        }
-#if UNITY_EDITOR
-                        else
-                        {
-                            SceneData dependencyData = SceneDatabase.GetSceneByName(dependency);
-                            if (dependencyData) EditorSceneManager.OpenScene(dependencyData.Path, OpenSceneMode.Additive);
-                        }
-#endif
-                    }
+                    if (Application.isPlaying) currentSceneData.ActivateSettings();
+                    LoadDependencies(currentSceneData);
                 }
+            }
+        }
+
+        private void LoadDependencies(SceneData sceneData)
+        {
+            if (!sceneData) return;
+            
+            List<string> loadedScenes = new();
+            for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
+            {
+                loadedScenes.Add(UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).name);
+            }
+
+            foreach (string dependency in sceneData.Dependencies)
+            {
+                if (loadedScenes.Contains(dependency)) continue;
+                if (Application.isPlaying)
+                {
+                    UnityEngine.SceneManagement.SceneManager.LoadScene(dependency, LoadSceneMode.Additive);
+                }
+#if UNITY_EDITOR
+                else
+                {
+                    SceneData dependencyData = SceneDatabase.GetSceneByName(dependency);
+                    if (dependencyData) EditorSceneManager.OpenScene(dependencyData.Path, OpenSceneMode.Additive);
+                }
+#endif
             }
         }
 
