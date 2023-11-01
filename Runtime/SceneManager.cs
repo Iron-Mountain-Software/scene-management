@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
-
+using UnityEditor.SceneManagement;
 #endif
 
 namespace IronMountain.SceneManagement
@@ -37,6 +36,8 @@ namespace IronMountain.SceneManagement
 
         [Header("Cache")]
         private State _state = State.None;
+        private Scene _awakeScene;
+        private SceneData _awakeSceneData;
         private SceneData _destinationScene;
 
         public Database SceneDatabase => sceneDatabase;
@@ -111,12 +112,15 @@ namespace IronMountain.SceneManagement
                 if (Application.isPlaying) DontDestroyOnLoad(gameObject);
                 UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
                 UnityEngine.SceneManagement.SceneManager.sceneUnloaded += OnSceneUnloaded;
-                Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-                SceneData currentSceneData = sceneDatabase.GetSceneByName(activeScene.name);
-                if (currentSceneData)
+#if UNITY_EDITOR
+                EditorSceneManager.sceneOpened += OnSceneOpenedInEditMode;
+#endif
+                _awakeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+                _awakeSceneData = sceneDatabase.GetSceneByName(_awakeScene.name);
+                if (_awakeSceneData)
                 {
-                    if (Application.isPlaying) currentSceneData.ActivateSettings();
-                    LoadDependencies(currentSceneData);
+                    if (Application.isPlaying) _awakeSceneData.ActivateSettings();
+                    LoadDependencies(_awakeSceneData);
                 }
             }
         }
@@ -154,10 +158,21 @@ namespace IronMountain.SceneManagement
             Instance = null;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
             UnityEngine.SceneManagement.SceneManager.sceneUnloaded -= OnSceneUnloaded;
+#if UNITY_EDITOR
+            EditorSceneManager.sceneOpened -= OnSceneOpenedInEditMode;
+#endif
         }
+
+#if UNITY_EDITOR
+        private void OnSceneOpenedInEditMode(Scene loadedScene, OpenSceneMode openSceneMode)
+        {
+            if (_awakeScene.isLoaded) EditorSceneManager.SetActiveScene(_awakeScene);
+        }
+#endif
 
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode mode)
         {
+            Debug.Log("OnSceneLoaded : " + loadedScene.name);
             SceneData loadedSceneData = sceneDatabase.GetSceneByName(loadedScene.name);
             if (!loadedSceneData) return;
             loadedSceneData.OnThisSceneLoaded();
