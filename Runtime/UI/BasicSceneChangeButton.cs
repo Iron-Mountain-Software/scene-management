@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime.UI
+namespace IronMountain.SceneManagement.UI
 {
     public class BasicSceneChangeButton : SceneChangeButton
     {

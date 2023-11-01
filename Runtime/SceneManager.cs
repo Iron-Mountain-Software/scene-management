@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
 #if UNITY_EDITOR
 
 #endif
 
-namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime
+namespace IronMountain.SceneManagement
 {
     [ExecuteAlways]
     public class SceneManager : MonoBehaviour

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime.Launch.UI
+namespace IronMountain.SceneManagement.Launch.UI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Text))]

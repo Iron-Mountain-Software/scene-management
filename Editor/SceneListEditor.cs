@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using IronMountain.SceneManagement.Packages.Scene_Management.Runtime;
 using UnityEditor;
 using UnityEngine;
 
-namespace IronMountain.SceneManagement.Packages.Scene_Management.Editor
+namespace IronMountain.SceneManagement.Editor
 {
     [CustomEditor(typeof(SceneList), true)]
     public class SceneListEditor : UnityEditor.Editor

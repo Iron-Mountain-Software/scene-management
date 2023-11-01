@@ -1,5 +1,5 @@
 # Scene Management
-Version: 1.4.0
+Version: 1.4.1
 A system for loading scenes, tracking scene dependencies, and storing scene metadata.
 
 ## Use Cases:

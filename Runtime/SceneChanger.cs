@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime
+namespace IronMountain.SceneManagement
 {
     public class SceneChanger : MonoBehaviour
     {

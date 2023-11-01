@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime
+namespace IronMountain.SceneManagement
 {
     [CreateAssetMenu(menuName = "Scriptable Objects/Scene Management/Scene Data")]
     public class SceneData : ScriptableObject

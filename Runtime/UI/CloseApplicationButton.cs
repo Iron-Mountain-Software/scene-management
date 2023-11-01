@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime.UI
+namespace IronMountain.SceneManagement.UI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Button))]

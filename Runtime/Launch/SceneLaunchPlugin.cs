@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace IronMountain.SceneManagement.Packages.Scene_Management.Runtime.Launch
+namespace IronMountain.SceneManagement.Launch
 {
     public class SceneLaunchPlugin : MonoBehaviour, ISceneLaunchPlugin
     {
