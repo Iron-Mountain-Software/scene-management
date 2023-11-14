@@ -1,6 +1,6 @@
 {
   "name": "com.iron-mountain.scene-management",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "displayName": "Scene Management",
   "author": "Chris Monteferrante <ludachrismonte@gmail.com>",
   "unity": "2019.1",
@@ -42,5 +42,6 @@
       "type": "itch.io",
       "url": "https://iron-mountain.itch.io/scene-management"
     }
-  ]
+  ],
+  "dependencies": {}
 }

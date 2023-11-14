@@ -1,14 +1,14 @@
 # Scene Management
-Version: 1.4.3
+*Version: 1.4.5*
+## Description: 
 A system for loading scenes, tracking scene dependencies, and storing scene metadata.
-
-## Use Cases:
+## Use Cases: 
 * Manage scene metadata, such as id, initial screen orientation, and initial Time.scale.
 * Load scenes with fade effects (fade old scene out, fade loading scene in, fade loading scene out, fade new scene in) 
 * Build loading screens with progress bars and percentage counters.  
 * Manage scene dependencies and automatically load them when they're needed. 
 * Manage lists of scenes, and apply a list to the build settings.
-## Directions for Use:
+## Directions for Use: 
 SceneData
 Scriptable Object that stores metadata about a scene.
 Must be named exactly the same as the scene it represents.
@@ -22,9 +22,10 @@ Create > Scriptable Objects > Scene Management > SceneList
 SceneManager (singleton)
 Attach to a GameObject.
 Use this singleton to load scenes.
-## Package Mirrors:
+## Package Mirrors: 
 [<img src='https://img.itch.zone/aW1nLzEzNzQ2ODg3LnBuZw==/original/npRUfq.png'>](https://github.com/Iron-Mountain-Software/scene-management)[<img src='https://img.itch.zone/aW1nLzEzNzQ2ODkyLnBuZw==/original/Fq0ORM.png'>](https://www.npmjs.com/package/com.iron-mountain.scene-management)[<img src='https://img.itch.zone/aW1nLzEzNzQ2ODk4LnBuZw==/original/Rv4m96.png'>](https://iron-mountain.itch.io/scene-management)
-## Key Scripts & Components:
+---
+## Key Scripts & Components: 
 1. public class **Database** : ScriptableObject
    * Properties: 
       * public List<SceneData> ***Scenes***  { get; }
@@ -52,6 +53,7 @@ Use this singleton to load scenes.
       * public List<String> ***Dependencies***  { get; }
    * Methods: 
       * public Boolean ***DependsOn***(Scene scene)
+      * public void ***Load***()
       * public virtual void ***ActivateSettings***()
       * public virtual void ***OnThisSceneLoaded***()
       * public virtual void ***OnThisSceneUnloaded***()

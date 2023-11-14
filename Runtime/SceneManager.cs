@@ -78,7 +78,7 @@ namespace IronMountain.SceneManagement
             if (!sceneDatabase || !sceneDatabase.LoginScene) return;
             LoadScene(sceneDatabase.LoginScene);
         }
-        
+
         public void LoadSceneByName(string sceneName)
         {
             SceneData sceneData = sceneDatabase ? sceneDatabase.GetSceneByName(sceneName) : null;

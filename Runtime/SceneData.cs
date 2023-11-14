@@ -56,6 +56,12 @@ namespace IronMountain.SceneManagement
             return false;
         }
 
+        [ContextMenu("Load This Scene")]
+        public void Load()
+        {
+            if (SceneManager.Instance) SceneManager.Instance.LoadScene(this);
+        }
+
         public virtual void ActivateSettings()
         {
             Time.timeScale = StartTimeScale;
