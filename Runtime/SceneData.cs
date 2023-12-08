@@ -56,6 +56,11 @@ namespace IronMountain.SceneManagement
             return false;
         }
 
+        public void Load(float delay)
+        {
+            if (SceneManager.Instance) SceneManager.Instance.LoadScene(this, delay);
+        }
+        
         [ContextMenu("Load This Scene")]
         public void Load()
         {

@@ -79,25 +79,25 @@ namespace IronMountain.SceneManagement
             LoadScene(sceneDatabase.LoginScene);
         }
 
-        public void LoadSceneByName(string sceneName)
+        public void LoadSceneByName(string sceneName, float delay = 0)
         {
             SceneData sceneData = sceneDatabase ? sceneDatabase.GetSceneByName(sceneName) : null;
             if (sceneData == null) sceneData = sceneDatabase ? sceneDatabase.FirstGameScene : null;
             LoadScene(sceneData);
         }
         
-        public void LoadSceneByID(string id)
+        public void LoadSceneByID(string id, float delay = 0)
         {
             SceneData sceneData = sceneDatabase ? sceneDatabase.GetSceneByID(id) : null;
             if (sceneData == null) sceneData = sceneDatabase ? sceneDatabase.FirstGameScene : null;
             LoadScene(sceneData);
         }
         
-        public void LoadScene(SceneData scene)
+        public void LoadScene(SceneData scene, float delay = 0)
         {
             if (!scene || CurrentState is State.Loading or State.Activating) return;
             StopAllCoroutines();
-            StartCoroutine(LoadSceneRunner(scene));
+            StartCoroutine(LoadSceneRunner(scene, delay));
         }
 
         private void Awake()
@@ -190,8 +190,10 @@ namespace IronMountain.SceneManagement
             loadedSceneData.OnThisSceneUnloaded();
         }
 
-        private IEnumerator LoadSceneRunner(SceneData sceneDataToLoad)
+        private IEnumerator LoadSceneRunner(SceneData sceneDataToLoad, float delay)
         {
+            if (delay > 0) yield return new WaitForSecondsRealtime(delay);
+            
             CurrentState = State.FadingOutToLoad;
             
             if (gameSceneFadeOutSeconds > 0) yield return new WaitForSecondsRealtime(gameSceneFadeOutSeconds);

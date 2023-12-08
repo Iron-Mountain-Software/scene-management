@@ -1,5 +1,5 @@
 # Scene Management
-*Version: 1.4.5*
+*Version: 1.4.6*
 ## Description: 
 A system for loading scenes, tracking scene dependencies, and storing scene metadata.
 ## Use Cases: 
@@ -53,6 +53,7 @@ Use this singleton to load scenes.
       * public List<String> ***Dependencies***  { get; }
    * Methods: 
       * public Boolean ***DependsOn***(Scene scene)
+      * public void ***Load***(float delay)
       * public void ***Load***()
       * public virtual void ***ActivateSettings***()
       * public virtual void ***OnThisSceneLoaded***()
@@ -76,9 +77,9 @@ Use this singleton to load scenes.
       * public SceneData ***GetSceneByID***(String id)
       * public SceneData ***GetRandomScene***()
       * public void ***LoadLoginScene***()
-      * public void ***LoadSceneByName***(String sceneName)
-      * public void ***LoadSceneByID***(String id)
-      * public void ***LoadScene***(SceneData scene)
+      * public void ***LoadSceneByName***(String sceneName, float delay)
+      * public void ***LoadSceneByID***(String id, float delay)
+      * public void ***LoadScene***(SceneData scene, float delay)
 ### Launch
 1. public interface **ISceneLaunchPlugin**
    * Actions: 
