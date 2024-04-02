@@ -19,7 +19,7 @@ namespace IronMountain.SceneManagement
         public List<SceneData> Scenes => scenes; 
         public SceneData LoginScene => loginScene;
         public SceneData FirstGameScene => firstGameScene;
-        
+
         public SceneData GetSceneByName(string sceneName)
         {
             return scenes.Find(test=> test.name == sceneName);
@@ -55,8 +55,8 @@ namespace IronMountain.SceneManagement
                 try  
                 {
                     if (!scene) throw new Exception("Null Scene");
-                    if (string.IsNullOrWhiteSpace(scene.ID)) throw new Exception("Scene with empty key: " + scene.Name);
-                    if (_dictionary.ContainsKey(scene.ID)) throw new Exception("Scenes with duplicate keys: " + scene.Name + ", " + _dictionary[scene.ID].Name);
+                    if (string.IsNullOrWhiteSpace(scene.ID)) throw new Exception("Scene Data with empty key: " + scene.Name);
+                    if (_dictionary.ContainsKey(scene.ID)) throw new Exception("Scene Data with duplicate keys: " + scene.Name + ", " + _dictionary[scene.ID].Name);
                     _dictionary.Add(scene.ID, scene);
                 }  
                 catch (Exception exception)  

@@ -29,6 +29,7 @@ namespace IronMountain.SceneManagement
         private static readonly string TemporaryScene = "Temporary Scene: ";
 
         [SerializeField] private Database sceneDatabase;
+        [SerializeField] private ScreenOrientation loadingSceneOrientation = ScreenOrientation.Portrait;
         [SerializeField] private float gameSceneFadeOutSeconds;
         [SerializeField] private float loadingSceneFadeInSeconds;
         [SerializeField] private float loadingSceneFadeOutSeconds;
@@ -82,14 +83,14 @@ namespace IronMountain.SceneManagement
         public void LoadSceneByName(string sceneName, float delay = 0)
         {
             SceneData sceneData = sceneDatabase ? sceneDatabase.GetSceneByName(sceneName) : null;
-            if (sceneData == null) sceneData = sceneDatabase ? sceneDatabase.FirstGameScene : null;
+            if (!sceneData) sceneData = sceneDatabase ? sceneDatabase.FirstGameScene : null;
             LoadScene(sceneData);
         }
         
         public void LoadSceneByID(string id, float delay = 0)
         {
             SceneData sceneData = sceneDatabase ? sceneDatabase.GetSceneByID(id) : null;
-            if (sceneData == null) sceneData = sceneDatabase ? sceneDatabase.FirstGameScene : null;
+            if (!sceneData) sceneData = sceneDatabase ? sceneDatabase.FirstGameScene : null;
             LoadScene(sceneData);
         }
         
@@ -123,6 +124,13 @@ namespace IronMountain.SceneManagement
                     LoadDependencies(_awakeSceneData);
                 }
             }
+        }
+
+        public SceneData GetActiveSceneData()
+        {
+            if (!sceneDatabase) return null;
+            Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            return sceneDatabase.GetSceneByName(activeScene.name);
         }
 
         private void LoadDependencies(SceneData sceneData)
@@ -175,7 +183,7 @@ namespace IronMountain.SceneManagement
             SceneData loadedSceneData = sceneDatabase.GetSceneByName(loadedScene.name);
             if (!loadedSceneData) return;
             loadedSceneData.OnThisSceneLoaded();
-            if (_destinationScene && _destinationScene.Name == loadedScene.name)
+            if (_destinationScene && _destinationScene.SceneName == loadedScene.name)
             {
                 _destinationScene = null;
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene(loadedScene);
@@ -203,7 +211,7 @@ namespace IronMountain.SceneManagement
             _destinationScene = sceneDataToLoad;
             _destinationScene.ActivateSettings();
             
-            Screen.orientation = ScreenOrientation.Portrait;
+            Screen.orientation = loadingSceneOrientation;
             
             bool destinationSceneAlreadyLoaded = false;
             List<string> scenesKeptLoaded = new ();
@@ -250,7 +258,7 @@ namespace IronMountain.SceneManagement
             foreach (string dependency in _destinationScene.Dependencies)
             {
                 if (string.IsNullOrWhiteSpace(dependency)) continue;
-                if (dependency == _destinationScene.Name) continue;
+                if (dependency == _destinationScene.SceneName) continue;
                 if (scenesKeptLoaded.Contains(dependency)) continue;
                 AsyncOperation operation =
                     UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(dependency, LoadSceneMode.Additive);

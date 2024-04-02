@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,49 +12,38 @@ namespace IronMountain.SceneManagement
         
 #if UNITY_EDITOR
         
-        [SerializeField] private UnityEditor.SceneAsset scene;
-        public UnityEditor.SceneAsset Scene => scene;
+        [SerializeField] public SceneAsset scene;
         
 #endif
         
         [SerializeField] private string id;
         [SerializeField] private string path;
+        [SerializeField] private string sceneName;
         [SerializeField] private ScreenOrientation screenOrientation = ScreenOrientation.Portrait;
+        [SerializeField] private bool setTimeScale = true;
         [SerializeField] private float startTimeScale = 1f;
-        [SerializeField] private List<SceneList> dependencyLists;
+        [SerializeField] private List<SceneList> dependencyLists = new ();
         
+#if UNITY_EDITOR
+        [SerializeField] private List<SceneAsset> dependencyScenes = new ();
+#endif
+        
+        [SerializeField] private List<string> dependencies = new ();
+
         public string ID => id;
         public string Path => path;
         public virtual string Name => name;
+        public virtual string SceneName => sceneName;
         public ScreenOrientation ScreenOrientation => screenOrientation;
-        public float StartTimeScale => startTimeScale;
-
-        public List<string> Dependencies
-        {
-            get
-            {
-                List<string> dependencies = new List<string>();
-                foreach (SceneList sceneList in dependencyLists)
-                {
-                    if (!sceneList) continue;
-                    foreach (string sceneName in sceneList.SceneNames)
-                    {
-                        if (string.IsNullOrWhiteSpace(sceneName) 
-                            || dependencies.Contains(sceneName)) continue;
-                        dependencies.Add(sceneName);
-                    }
-                }
-                return dependencies;
-            }
-        }
+        public List<SceneList> DependencyLists => dependencyLists;
+#if UNITY_EDITOR
+        public List<SceneAsset> DependencyScenes => dependencyScenes;
+#endif
+        public List<string> Dependencies => dependencies;
 
         public bool DependsOn(Scene scene)
         {
-            foreach (SceneList sceneList in dependencyLists)
-            {
-                if (sceneList && sceneList.SceneNames.Contains(scene.name)) return true;
-            }
-            return false;
+            return dependencies != null && dependencies.Contains(scene.name);
         }
 
         public void Load(float delay)
@@ -69,12 +59,22 @@ namespace IronMountain.SceneManagement
 
         public virtual void ActivateSettings()
         {
-            Time.timeScale = StartTimeScale;
+            if (setTimeScale) Time.timeScale = startTimeScale;
         }
 
         public virtual void OnThisSceneLoaded() { }
         
         public virtual void OnThisSceneUnloaded() { }
+
+        private void OnEnable()
+        {
+            SceneDataManager.RegisterSceneData(this);
+        }
+
+        private void OnDisable()
+        {
+            SceneDataManager.UnregisterSceneData(this);
+        }
 
 #if UNITY_EDITOR
         
@@ -83,23 +83,41 @@ namespace IronMountain.SceneManagement
             GenerateNewID();
         }
         
-        protected virtual void OnValidate()
+        public virtual void OnValidate()
         {
-            PruneDependencies();
-            path = UnityEditor.AssetDatabase.GetAssetPath(scene);
+            RefreshDependencies();
+            path = AssetDatabase.GetAssetPath(scene);
+            sceneName = scene ? scene.name : string.Empty;
         }
 
         [ContextMenu("Generate New ID")]
         private void GenerateNewID()
         {
-            id = UnityEditor.GUID.Generate().ToString();
+            id = GUID.Generate().ToString();
         }
 
-        [ContextMenu("Prune Dependencies")]
-        private void PruneDependencies()
+        [ContextMenu("Refresh Dependencies")]
+        private void RefreshDependencies()
         {
             dependencyLists = dependencyLists.Distinct().ToList();
-            dependencyLists.RemoveAll(dependencySceneAsset => !dependencySceneAsset);
+            dependencyScenes = dependencyScenes.Distinct().ToList();
+            dependencies.Clear();
+            foreach (SceneList sceneList in dependencyLists)
+            {
+                if (!sceneList) continue;
+                foreach (string sceneName in sceneList.SceneNames)
+                {
+                    if (string.IsNullOrWhiteSpace(sceneName) 
+                        || dependencies.Contains(sceneName)) continue;
+                    dependencies.Add(sceneName);
+                }
+            }
+            foreach (SceneAsset sceneAsset in dependencyScenes)
+            {
+                if (string.IsNullOrWhiteSpace(sceneAsset.name) 
+                    || dependencies.Contains(sceneAsset.name)) continue;
+                dependencies.Add(sceneAsset.name);
+            }
         }
 
 #endif

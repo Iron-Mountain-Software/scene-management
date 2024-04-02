@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -13,6 +14,12 @@ namespace IronMountain.SceneManagement.Editor
         private void OnEnable()
         {
             _database = (Database) target;
+            SceneDataManager.OnSceneDataChanged += OnSceneDataChanged;
+        }
+
+        private void OnDisable()
+        {
+            SceneDataManager.OnSceneDataChanged -= OnSceneDataChanged;
         }
 
         public override void OnInspectorGUI()
@@ -25,65 +32,49 @@ namespace IronMountain.SceneManagement.Editor
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Rebuild Scene List"))
+            if (GUILayout.Button("Create", GUILayout.Height(30)))
             {
-                RebuildSceneList();
+                NewSceneWindow.Open();
             }
-            if (GUILayout.Button("Sort Scene List"))
+            if (GUILayout.Button("Rebuild", GUILayout.Height(30)))
             {
-                _database.SortList();
+                Rebuild();
             }
-            if (GUILayout.Button("Rebuild Dictionary"))
-            {
-                _database.RebuildDictionary();
-            }
-            if (GUILayout.Button("Log & Copy Data"))
+            if (GUILayout.Button("Log & Copy Data", GUILayout.Height(30)))
             {
                 string data = _database.ToString();
                 EditorGUIUtility.systemCopyBuffer = data;
                 Debug.Log(data);
             }
             EditorGUILayout.EndHorizontal();
-            EditorGUILayout.Space();
 
-            EditorGUILayout.BeginHorizontal();
-            SerializedProperty scenes = serializedObject.FindProperty("scenes");
-            EditorGUILayout.PropertyField(scenes);
-            EditorGUILayout.BeginVertical(GUILayout.MaxWidth(50));
-            if (scenes.isExpanded)
+            foreach (SceneData sceneData in _database.Scenes)
             {
-                GUILayout.Space(EditorGUIUtility.singleLineHeight * 1.5f);
-                foreach (SceneData sceneData in _database.Scenes)
-                {
-                    EditorGUI.BeginDisabledGroup(!sceneData);
-                    if (GUILayout.Button("Load", GUILayout.MaxHeight(EditorGUIUtility.singleLineHeight)))
-                    {
-                        if (!sceneData) continue;
-                        if (Application.isPlaying)
-                        {
-                            if (SceneManager.Instance) SceneManager.Instance.LoadScene(sceneData);
-                            else UnityEngine.SceneManagement.SceneManager.LoadScene(sceneData.name);
-                        }
-                        else
-                        {
-                            string path = AssetDatabase.GetAssetPath(sceneData);
-                            if (string.IsNullOrWhiteSpace(path)) return;
-                            string directory = Path.GetDirectoryName(path);
-                            string filename = Path.GetFileNameWithoutExtension(path);
-                            EditorSceneManager.OpenScene(Path.Combine(directory, filename + ".unity"));
-                        }
-                        Selection.activeObject = FindObjectOfType<SceneManager>();
-                    }
-                    EditorGUI.EndDisabledGroup();
-                }
+                DrawScene(sceneData);
             }
-            EditorGUILayout.EndVertical();
-            EditorGUILayout.EndHorizontal();
             
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void RebuildSceneList()
+        private void DrawScene(SceneData sceneData)
+        {
+            if (!sceneData) return;
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(sceneData.name, GUILayout.Height(25))) EditorGUIUtility.PingObject(sceneData);
+            if (GUILayout.Button("Load", GUILayout.Width(50), GUILayout.Height(25)))
+            {
+                if (Application.isPlaying)
+                {
+                    if (SceneManager.Instance) SceneManager.Instance.LoadScene(sceneData);
+                    else UnityEngine.SceneManagement.SceneManager.LoadScene(sceneData.SceneName);
+                }
+                else EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(sceneData.scene));
+                Selection.activeObject = FindObjectOfType<SceneManager>();
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        private void Rebuild()
         {
             _database.Scenes.Clear();
             string[] guids = AssetDatabase.FindAssets($"t:{typeof(SceneData)}");
@@ -93,9 +84,30 @@ namespace IronMountain.SceneManagement.Editor
                 SceneData asset = AssetDatabase.LoadAssetAtPath<SceneData>( assetPath );
                 if (asset) _database.Scenes.Add(asset);
             }
+            _database.SortList();
+            _database.RebuildDictionary();
             EditorUtility.SetDirty(_database);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
+
+        private void OnSceneDataChanged()
+        {
+            bool dirty = false;
+            foreach (SceneData sceneData in SceneDataManager.SceneData)
+            {
+                if (!sceneData || _database.Scenes.Contains(sceneData)) continue;
+                _database.Scenes.Add(sceneData);
+                dirty = true;
+            }
+            if (dirty)
+            {
+                _database.SortList();
+                _database.RebuildDictionary();
+                EditorUtility.SetDirty(_database);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
         }
     }
 }

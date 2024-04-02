@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -19,7 +20,17 @@ namespace IronMountain.SceneManagement
         [SerializeField] private List<string> sceneNames = new ();
 
         public List<string> SceneNames => sceneNames;
-        
+
+        private void OnEnable()
+        {
+            SceneListsManager.RegisterSceneList(this);
+        }
+
+        private void OnDisable()
+        {
+            SceneListsManager.UnregisterSceneList(this);
+        }
+
 #if UNITY_EDITOR
 
         private void OnValidate()
@@ -31,7 +42,6 @@ namespace IronMountain.SceneManagement
         private void PruneScenes()
         {
             scenes = scenes.Distinct().ToList();
-            scenes.RemoveAll(scene => !scene);
             sceneNames.Clear();
             foreach (SceneAsset sceneAsset in scenes) sceneNames.Add(sceneAsset.name);
         }

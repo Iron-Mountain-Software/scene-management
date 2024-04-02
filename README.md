@@ -1,5 +1,5 @@
 # Scene Management
-*Version: 1.4.6*
+*Version: 1.5.0*
 ## Description: 
 A system for loading scenes, tracking scene dependencies, and storing scene metadata.
 ## Use Cases: 
@@ -44,12 +44,13 @@ Use this singleton to load scenes.
       * public void ***LoadScene***(SceneData sceneData)
 1. public class **SceneData** : ScriptableObject
    * Properties: 
-      * public SceneAsset ***Scene***  { get; }
       * public String ***ID***  { get; }
       * public String ***Path***  { get; }
       * public String ***Name***  { get; }
+      * public String ***SceneName***  { get; }
       * public ScreenOrientation ***ScreenOrientation***  { get; }
-      * public float ***StartTimeScale***  { get; }
+      * public List<SceneList> ***DependencyLists***  { get; }
+      * public List<SceneAsset> ***DependencyScenes***  { get; }
       * public List<String> ***Dependencies***  { get; }
    * Methods: 
       * public Boolean ***DependsOn***(Scene scene)
@@ -59,10 +60,13 @@ Use this singleton to load scenes.
       * public virtual void ***OnThisSceneLoaded***()
       * public virtual void ***OnThisSceneUnloaded***()
       * public virtual void ***Reset***()
+      * public virtual void ***OnValidate***()
+1. public static class **SceneDataManager**
 1. public class **SceneList** : ScriptableObject
    * Properties: 
       * public List<SceneAsset> ***Scenes***  { get; }
       * public List<String> ***SceneNames***  { get; }
+1. public static class **SceneListsManager**
 1. public class **SceneManager** : MonoBehaviour
    * Properties: 
       * public Database ***SceneDatabase***  { get; }
@@ -80,6 +84,7 @@ Use this singleton to load scenes.
       * public void ***LoadSceneByName***(String sceneName, float delay)
       * public void ***LoadSceneByID***(String id, float delay)
       * public void ***LoadScene***(SceneData scene, float delay)
+      * public SceneData ***GetActiveSceneData***()
 ### Launch
 1. public interface **ISceneLaunchPlugin**
    * Actions: 
