@@ -1,15 +1,27 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace IronMountain.SceneManagement.Editor
 {
     [CustomEditor(typeof(Database), true)]
     public class DatabaseInspector : UnityEditor.Editor
     {
+        private enum SortType
+        {
+            Path,
+            Alphabetical,
+            Buildlist
+        }
+        
+        private static SortType _sortType = SortType.Path;
+
         private Database _database;
+        private readonly Dictionary<string, bool> _pathViewDirectories = new ();
+        private readonly Dictionary<SceneData, UnityEditor.Editor> _nestedEditors = new ();
 
         private void OnEnable()
         {
@@ -48,20 +60,149 @@ namespace IronMountain.SceneManagement.Editor
             }
             EditorGUILayout.EndHorizontal();
 
-            foreach (SceneData sceneData in _database.Scenes)
-            {
-                DrawScene(sceneData);
-            }
+            DrawSortButtons();
             
+            switch (_sortType)
+            {
+                case SortType.Path:
+                    DrawPathView();
+                    break;
+                case SortType.Alphabetical:
+                    DrawAlphabeticalView();
+                    break;
+                case SortType.Buildlist:
+                    DrawBuildListView();
+                    break;
+            }
+
             serializedObject.ApplyModifiedProperties();
         }
+        
+        private void DrawSortButtons()
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Sort:", GUILayout.Width(50), GUILayout.Height(25));
+            EditorGUI.BeginDisabledGroup(_sortType == SortType.Path);
+            if (GUILayout.Button("Path", GUILayout.ExpandHeight(true))) _sortType = SortType.Path;
+            EditorGUI.EndDisabledGroup();
+            EditorGUI.BeginDisabledGroup(_sortType == SortType.Alphabetical);
+            if (GUILayout.Button("Alphabetical", GUILayout.ExpandHeight(true))) _sortType = SortType.Alphabetical;
+            EditorGUI.EndDisabledGroup();
+            EditorGUI.BeginDisabledGroup(_sortType == SortType.Buildlist);
+            if (GUILayout.Button("Build List", GUILayout.ExpandHeight(true))) _sortType = SortType.Buildlist;
+            EditorGUI.EndDisabledGroup();
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space(5);
+        }
 
-        private void DrawScene(SceneData sceneData)
+        private void DrawPathView()
+        {
+            _database.Scenes.Sort(ComparePath);
+            string lastDirectory = string.Empty;
+            foreach(SceneData sceneData in _database.Scenes)
+            {
+                if (!sceneData) continue;
+                string directory = sceneData.Directory;
+                bool draw = _pathViewDirectories.ContainsKey(directory) && _pathViewDirectories[directory];
+                if (directory != lastDirectory)
+                {
+                    if (!_pathViewDirectories.ContainsKey(directory)) _pathViewDirectories.Add(directory, true);
+                    _pathViewDirectories[directory] = EditorGUILayout.Foldout(_pathViewDirectories[directory], directory);
+                    draw = _pathViewDirectories[directory];
+                    lastDirectory = directory;
+                }
+                if (draw) DrawScene(sceneData, sceneData.SceneName, false, true);
+            }
+        }
+        
+        private void DrawAlphabeticalView()
+        {
+            _database.Scenes.Sort(CompareAlphabetical);
+            foreach(SceneData sceneData in _database.Scenes)
+            {
+                if (!sceneData) continue;
+                DrawScene(sceneData, sceneData.SceneName, false, true);
+            }
+        }
+        
+        private void DrawBuildListView()
+        {
+            _database.Scenes.Sort(CompareBuildIndex);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.BeginVertical();
+            GUILayout.Label("Not In Build:");
+            bool drewOtherLabel = false;
+            foreach(SceneData sceneData in _database.Scenes)
+            {
+                if (!sceneData) continue;
+                bool inBuild = IncludedInBuild(sceneData);
+                if (inBuild && !drewOtherLabel)
+                {
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.BeginVertical(GUILayout.Width(10));
+                    EditorGUILayout.Space(5);
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.BeginVertical();
+                    GUILayout.Label("In Build:");
+                    drewOtherLabel = true;
+                }
+                DrawScene(sceneData, sceneData.SceneName, true, inBuild);
+            }
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private int ComparePath(SceneData a, SceneData b)
+        {
+            if (!a) return -1;
+            if (!b) return 1;
+
+            for (int i = 0; i < Mathf.Min(a.Directory.Length, b.Directory.Length); i++)
+            {
+                int compare = string.CompareOrdinal(a.Directory[i].ToString(), b.Directory[i].ToString());
+                if (compare != 0) return compare;
+            }
+
+            if (a.Directory.Length > b.Directory.Length) return 1; 
+            if (b.Directory.Length > a.Directory.Length) return -1;
+            return string.Compare(a.Directory, b.Directory, StringComparison.Ordinal);
+        }
+        
+        private int CompareAlphabetical(SceneData a, SceneData b)
+        {
+            if (!a) return -1;
+            if (!b) return 1;
+            return string.Compare(a.SceneName, b.SceneName, StringComparison.OrdinalIgnoreCase);
+        }
+        
+        private int CompareBuildIndex(SceneData a, SceneData b)
+        {
+            if (!a) return -1;
+            if (!b) return 1;
+            int indexOfA = GetBuildIndex(a);
+            int indexOfB = GetBuildIndex(b);
+            return indexOfA.CompareTo(indexOfB);
+        }
+
+        private void DrawScene(SceneData sceneData, string label, bool drawBuildControls, bool inBuild)
         {
             if (!sceneData) return;
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(sceneData.name, GUILayout.Height(25))) EditorGUIUtility.PingObject(sceneData);
-            if (GUILayout.Button("Load", GUILayout.Width(50), GUILayout.Height(25)))
+            if (!_nestedEditors.ContainsKey(sceneData)) _nestedEditors.Add(sceneData, null);
+            bool open = _nestedEditors[sceneData];
+            open = EditorGUILayout.Toggle("", open, GUILayout.Width(20));
+            if (open && !_nestedEditors[sceneData])
+            {
+                UnityEditor.Editor cachedEditor = null;
+                CreateCachedEditor(sceneData, null, ref cachedEditor);
+                _nestedEditors[sceneData] = cachedEditor;
+            }
+            else if (!open && _nestedEditors[sceneData])
+            {
+                _nestedEditors[sceneData] = null;
+            }
+            if (GUILayout.Button(label, GUILayout.Height(25))) EditorGUIUtility.PingObject(sceneData);
+            if (GUILayout.Button("Load", GUILayout.Width(60), GUILayout.Height(25)))
             {
                 if (Application.isPlaying)
                 {
@@ -71,18 +212,87 @@ namespace IronMountain.SceneManagement.Editor
                 else EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(sceneData.scene));
                 Selection.activeObject = FindObjectOfType<SceneManager>();
             }
+
+            if (drawBuildControls)
+            {
+                if (!inBuild && GUILayout.Button("+", GUILayout.Width(25), GUILayout.Height(25)))
+                {
+                    Append(sceneData);
+                } 
+                else if (inBuild && GUILayout.Button(EditorGUIUtility.IconContent("d_TreeEditor.Trash"), GUILayout.Width(25), GUILayout.Height(25)))
+                {
+                    Remove(sceneData);
+                }
+            }
             GUILayout.EndHorizontal();
+            
+            if (_nestedEditors.ContainsKey(sceneData) && _nestedEditors[sceneData])
+            {
+                EditorGUI.indentLevel += 2;
+                _nestedEditors[sceneData].OnInspectorGUI();
+                EditorGUI.indentLevel -= 2;
+            }
+        }
+        
+        private static void Append(SceneData sceneData)
+        {
+            if (!sceneData) return;
+            List<EditorBuildSettingsScene> editorBuildSettingsScenes = new List<EditorBuildSettingsScene>();
+            foreach (EditorBuildSettingsScene entry in EditorBuildSettings.scenes)
+            {
+                editorBuildSettingsScenes.Add(new EditorBuildSettingsScene(entry.path, entry.enabled));
+            }
+            editorBuildSettingsScenes.Add(new EditorBuildSettingsScene(sceneData.Path, true));
+            EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
+        }
+        
+        private static void Remove(SceneData sceneData)
+        {
+            if (!sceneData) return;
+            List<EditorBuildSettingsScene> editorBuildSettingsScenes = new List<EditorBuildSettingsScene>();
+            foreach (EditorBuildSettingsScene entry in EditorBuildSettings.scenes)
+            {
+                if (entry.path == sceneData.Path) continue;
+                editorBuildSettingsScenes.Add(new EditorBuildSettingsScene(entry.path, entry.enabled));
+            }
+            EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
+        }
+        
+        private static int GetBuildIndex(SceneData sceneData)
+        {
+            if (!sceneData) return -1;
+            for (int i = 0; i < EditorBuildSettings.scenes.Length; i++)
+            {
+                if (EditorBuildSettings.scenes[i].path == sceneData.Path) return i;
+            }
+            return -1;
+        }
+        
+        private static bool IncludedInBuild(SceneData sceneData)
+        {
+            if (!sceneData) return false;
+            for (int i = 0; i < EditorBuildSettings.scenes.Length; i++)
+            {
+                if (EditorBuildSettings.scenes[i].path == sceneData.Path) return true;
+            }
+            return false;
         }
 
         private void Rebuild()
         {
+            _nestedEditors.Clear();
             _database.Scenes.Clear();
             string[] guids = AssetDatabase.FindAssets($"t:{typeof(SceneData)}");
             for( int i = 0; i < guids.Length; i++ )
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath( guids[i] );
-                SceneData asset = AssetDatabase.LoadAssetAtPath<SceneData>( assetPath );
-                if (asset) _database.Scenes.Add(asset);
+                SceneData sceneData = AssetDatabase.LoadAssetAtPath<SceneData>( assetPath );
+                if (sceneData)
+                {
+                    sceneData.OnValidate();
+                    _database.Scenes.Add(sceneData);
+                    EditorUtility.SetDirty(sceneData);
+                }
             }
             _database.SortList();
             _database.RebuildDictionary();

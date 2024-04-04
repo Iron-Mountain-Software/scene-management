@@ -16,14 +16,19 @@ namespace IronMountain.SceneManagement.Editor
 
         public override void OnInspectorGUI()
         {
+            serializedObject.Update();
+            
             EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Script"));
             EditorGUI.EndDisabledGroup();
             
             EditorGUILayout.PropertyField(serializedObject.FindProperty("scene"));
+            EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("id"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("path"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("directory"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("sceneName"));
+            EditorGUI.EndDisabledGroup();
             EditorGUILayout.PropertyField(serializedObject.FindProperty("screenOrientation"));
             GUILayout.BeginHorizontal();
             SerializedProperty setTimescale = serializedObject.FindProperty("setTimeScale");
@@ -73,6 +78,7 @@ namespace IronMountain.SceneManagement.Editor
                 "scene",
                 "id",
                 "path",
+                "directory",
                 "sceneName",
                 "screenOrientation",
                 "setTimeScale",
@@ -82,7 +88,6 @@ namespace IronMountain.SceneManagement.Editor
                 "dependencies");
             
             serializedObject.ApplyModifiedProperties();
-            _sceneData.OnValidate();
         }
 
         private void ShowDependencyMenu()
@@ -108,7 +113,7 @@ namespace IronMountain.SceneManagement.Editor
                 foreach (SceneData sceneData in SceneDataManager.SceneData)
                 {
                     if (!sceneData) continue;
-                    menu.AddItem(new GUIContent(sceneData.name), _sceneData.Dependencies.Contains(sceneData.SceneName), () =>
+                    menu.AddItem(new GUIContent(sceneData.SceneName), _sceneData.Dependencies.Contains(sceneData.SceneName), () =>
                     {
                         ToggleDependencySceneAsset(sceneData.scene);
                     });
@@ -151,6 +156,8 @@ namespace IronMountain.SceneManagement.Editor
                 listProperty.GetArrayElementAtIndex(listProperty.arraySize - 1).objectReferenceValue = sceneList;
             }
             else listProperty.DeleteArrayElementAtIndex(index);
+            serializedObject.ApplyModifiedProperties();
+            _sceneData.OnValidate();
         }
         
         private void ToggleDependencySceneAsset(SceneAsset sceneAsset)
@@ -164,6 +171,8 @@ namespace IronMountain.SceneManagement.Editor
                 listProperty.GetArrayElementAtIndex(listProperty.arraySize - 1).objectReferenceValue = sceneAsset;
             }
             else listProperty.DeleteArrayElementAtIndex(index);
+            serializedObject.ApplyModifiedProperties();
+            _sceneData.OnValidate();
         }
     }
 }
