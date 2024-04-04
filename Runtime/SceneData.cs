@@ -11,13 +11,12 @@ namespace IronMountain.SceneManagement
     {
         
 #if UNITY_EDITOR
-        
         [SerializeField] public SceneAsset scene;
-        
 #endif
         
         [SerializeField] private string id;
         [SerializeField] private string path;
+        [SerializeField] private string directory;
         [SerializeField] private string sceneName;
         [SerializeField] private ScreenOrientation screenOrientation = ScreenOrientation.Portrait;
         [SerializeField] private bool setTimeScale = true;
@@ -32,6 +31,7 @@ namespace IronMountain.SceneManagement
 
         public string ID => id;
         public string Path => path;
+        public string Directory => directory;
         public virtual string Name => name;
         public virtual string SceneName => sceneName;
         public ScreenOrientation ScreenOrientation => screenOrientation;
@@ -86,7 +86,8 @@ namespace IronMountain.SceneManagement
         public virtual void OnValidate()
         {
             RefreshDependencies();
-            path = AssetDatabase.GetAssetPath(scene);
+            path = scene ? AssetDatabase.GetAssetPath(scene) : string.Empty;
+            directory = !string.IsNullOrWhiteSpace(path) ? System.IO.Path.GetDirectoryName(path) : string.Empty;
             sceneName = scene ? scene.name : string.Empty;
         }
 

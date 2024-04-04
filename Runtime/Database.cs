@@ -22,7 +22,7 @@ namespace IronMountain.SceneManagement
 
         public SceneData GetSceneByName(string sceneName)
         {
-            return scenes.Find(test=> test.name == sceneName);
+            return scenes.Find(test=> test && test.name == sceneName);
         }
         
         public SceneData GetSceneByID(string id)
@@ -83,5 +83,16 @@ namespace IronMountain.SceneManagement
             result.Append("</SCENES>\n");
             return result.ToString();
         }
+
+#if UNITY_EDITOR
+
+        private void OnValidate()
+        {
+            scenes.RemoveAll(test => !test);
+            scenes = scenes.Distinct().ToList();
+        }
+
+#endif
+        
     }
 }

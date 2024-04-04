@@ -28,7 +28,7 @@ namespace IronMountain.SceneManagement
         {
             if (!a) return -1;
             if (!b) return 1;
-            return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
+            return string.Compare(a.SceneName, b.SceneName, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
