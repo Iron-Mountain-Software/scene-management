@@ -52,6 +52,7 @@ namespace IronMountain.SceneManagement.UI
                     Destroy(child.gameObject);
                 }
             }
+#if UNITY_EDITOR
             else
             {
                 while (parent.childCount > 0)
@@ -61,6 +62,7 @@ namespace IronMountain.SceneManagement.UI
                     DestroyImmediate(child.gameObject);
                 }
             }
+#endif
         }
 
         private void InstantiateButtons()
