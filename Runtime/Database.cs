@@ -22,7 +22,7 @@ namespace IronMountain.SceneManagement
 
         public SceneData GetSceneByName(string sceneName)
         {
-            return scenes.Find(test=> test && test.name == sceneName);
+            return scenes.Find(test=> test && test.SceneName == sceneName);
         }
         
         public SceneData GetSceneByID(string id)

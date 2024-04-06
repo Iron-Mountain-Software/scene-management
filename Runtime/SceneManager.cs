@@ -219,7 +219,7 @@ namespace IronMountain.SceneManagement
             for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
             {
                 Scene scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
-                if (_destinationScene.name.Equals(scene.name))
+                if (_destinationScene.SceneName.Equals(scene.name))
                 {
                     destinationSceneAlreadyLoaded = true;
                     UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
@@ -250,7 +250,7 @@ namespace IronMountain.SceneManagement
             if (!destinationSceneAlreadyLoaded)
             {
                 AsyncOperation mainOperation =
-                    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(_destinationScene.name, LoadSceneMode.Additive);
+                    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(_destinationScene.SceneName, LoadSceneMode.Additive);
                 mainOperation.allowSceneActivation = false;
                 sceneLoadingOperations.Add(mainOperation);
             }
