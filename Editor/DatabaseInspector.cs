@@ -127,7 +127,7 @@ namespace IronMountain.SceneManagement.Editor
             foreach(SceneData sceneData in _database.Scenes)
             {
                 if (!sceneData) continue;
-                bool inBuild = IncludedInBuild(sceneData);
+                bool inBuild = sceneData.BuildIndex >= 0;
                 if (inBuild && !drewOtherLabel)
                 {
                     EditorGUILayout.EndVertical();
@@ -194,7 +194,7 @@ namespace IronMountain.SceneManagement.Editor
             }
         }
         
-        private static void Append(SceneData sceneData)
+        private void Append(SceneData sceneData)
         {
             if (!sceneData) return;
             List<EditorBuildSettingsScene> editorBuildSettingsScenes = new List<EditorBuildSettingsScene>();
@@ -204,9 +204,10 @@ namespace IronMountain.SceneManagement.Editor
             }
             editorBuildSettingsScenes.Add(new EditorBuildSettingsScene(sceneData.Path, true));
             EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
+            Rebuild();
         }
         
-        private static void Remove(SceneData sceneData)
+        private void Remove(SceneData sceneData)
         {
             if (!sceneData) return;
             List<EditorBuildSettingsScene> editorBuildSettingsScenes = new List<EditorBuildSettingsScene>();
@@ -216,16 +217,7 @@ namespace IronMountain.SceneManagement.Editor
                 editorBuildSettingsScenes.Add(new EditorBuildSettingsScene(entry.path, entry.enabled));
             }
             EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
-        }
-
-        private static bool IncludedInBuild(SceneData sceneData)
-        {
-            if (!sceneData) return false;
-            for (int i = 0; i < EditorBuildSettings.scenes.Length; i++)
-            {
-                if (EditorBuildSettings.scenes[i].path == sceneData.Path) return true;
-            }
-            return false;
+            Rebuild();
         }
 
         private void Rebuild()
