@@ -1,6 +1,9 @@
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace IronMountain.SceneManagement.UI
 {
@@ -71,13 +74,15 @@ namespace IronMountain.SceneManagement.UI
             foreach (var sceneData in list)
             {
                 if (!sceneData) continue;
-                if (!Application.isPlaying)
+                if (Application.isPlaying) Instantiate(prefab, parent).SceneData = sceneData;
+#if UNITY_EDITOR
+                else
                 {
                     Object instantiated = PrefabUtility.InstantiatePrefab(prefab, parent);
                     if (instantiated is not BasicSceneChangeButton basicSceneChangeButton) continue;
                     basicSceneChangeButton.SceneData = sceneData;
                 }
-                else Instantiate(prefab, parent).SceneData = sceneData;
+#endif
             }
         }
     }
