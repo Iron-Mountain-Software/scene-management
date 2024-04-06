@@ -44,12 +44,22 @@ namespace IronMountain.SceneManagement.UI
         private void ClearParent()
         {
             if (!parent) return;
-            while (parent.childCount > 0)
+            if (Application.isPlaying)
             {
-                Transform child = parent.GetChild(0);
-                if (!child || !child.gameObject) continue;
-                if (Application.isPlaying) Destroy(child.gameObject);
-                else DestroyImmediate(child.gameObject);
+                foreach (Transform child in parent)
+                {
+                    if (!child || !child.gameObject) continue;
+                    Destroy(child.gameObject);
+                }
+            }
+            else
+            {
+                while (parent.childCount > 0)
+                {
+                    Transform child = parent.GetChild(0);
+                    if (!child || !child.gameObject) continue;
+                    DestroyImmediate(child.gameObject);
+                }
             }
         }
 
