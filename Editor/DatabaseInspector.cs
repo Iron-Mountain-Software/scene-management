@@ -3,21 +3,13 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace IronMountain.SceneManagement.Editor
 {
     [CustomEditor(typeof(Database), true)]
     public class DatabaseInspector : UnityEditor.Editor
     {
-        private enum SortType
-        {
-            Path,
-            Alphabetical,
-            Buildlist
-        }
-        
-        private static SortType _sortType = SortType.Path;
+        private static SceneListSorts.Type _sortType = SceneListSorts.Type.Path;
 
         private Database _database;
         private readonly Dictionary<string, bool> _pathViewDirectories = new ();
@@ -64,13 +56,13 @@ namespace IronMountain.SceneManagement.Editor
             
             switch (_sortType)
             {
-                case SortType.Path:
+                case SceneListSorts.Type.Path:
                     DrawPathView();
                     break;
-                case SortType.Alphabetical:
+                case SceneListSorts.Type.SceneName:
                     DrawAlphabeticalView();
                     break;
-                case SortType.Buildlist:
+                case SceneListSorts.Type.BuildIndex:
                     DrawBuildListView();
                     break;
             }
@@ -82,14 +74,14 @@ namespace IronMountain.SceneManagement.Editor
         {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Sort:", GUILayout.Width(50), GUILayout.Height(25));
-            EditorGUI.BeginDisabledGroup(_sortType == SortType.Path);
-            if (GUILayout.Button("Path", GUILayout.ExpandHeight(true))) _sortType = SortType.Path;
+            EditorGUI.BeginDisabledGroup(_sortType == SceneListSorts.Type.Path);
+            if (GUILayout.Button("Path", GUILayout.ExpandHeight(true))) _sortType = SceneListSorts.Type.Path;
             EditorGUI.EndDisabledGroup();
-            EditorGUI.BeginDisabledGroup(_sortType == SortType.Alphabetical);
-            if (GUILayout.Button("Alphabetical", GUILayout.ExpandHeight(true))) _sortType = SortType.Alphabetical;
+            EditorGUI.BeginDisabledGroup(_sortType == SceneListSorts.Type.SceneName);
+            if (GUILayout.Button("Scene Name", GUILayout.ExpandHeight(true))) _sortType = SceneListSorts.Type.SceneName;
             EditorGUI.EndDisabledGroup();
-            EditorGUI.BeginDisabledGroup(_sortType == SortType.Buildlist);
-            if (GUILayout.Button("Build List", GUILayout.ExpandHeight(true))) _sortType = SortType.Buildlist;
+            EditorGUI.BeginDisabledGroup(_sortType == SceneListSorts.Type.BuildIndex);
+            if (GUILayout.Button("Build Index", GUILayout.ExpandHeight(true))) _sortType = SceneListSorts.Type.BuildIndex;
             EditorGUI.EndDisabledGroup();
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space(5);
@@ -97,7 +89,7 @@ namespace IronMountain.SceneManagement.Editor
 
         private void DrawPathView()
         {
-            _database.Scenes.Sort(ComparePath);
+            _database.Scenes.Sort(SceneListSorts.ComparePath);
             string lastDirectory = string.Empty;
             foreach(SceneData sceneData in _database.Scenes)
             {
@@ -116,8 +108,8 @@ namespace IronMountain.SceneManagement.Editor
         }
         
         private void DrawAlphabeticalView()
-        {
-            _database.Scenes.Sort(CompareAlphabetical);
+        {           
+            _database.Scenes.Sort(SceneListSorts.CompareSceneName);
             foreach(SceneData sceneData in _database.Scenes)
             {
                 if (!sceneData) continue;
@@ -127,7 +119,7 @@ namespace IronMountain.SceneManagement.Editor
         
         private void DrawBuildListView()
         {
-            _database.Scenes.Sort(CompareBuildIndex);
+            _database.Scenes.Sort(SceneListSorts.CompareBuildIndex);
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.BeginVertical();
             GUILayout.Label("Not In Build:");
@@ -150,38 +142,6 @@ namespace IronMountain.SceneManagement.Editor
             }
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
-        }
-
-        private int ComparePath(SceneData a, SceneData b)
-        {
-            if (!a) return -1;
-            if (!b) return 1;
-
-            for (int i = 0; i < Mathf.Min(a.Directory.Length, b.Directory.Length); i++)
-            {
-                int compare = string.CompareOrdinal(a.Directory[i].ToString(), b.Directory[i].ToString());
-                if (compare != 0) return compare;
-            }
-
-            if (a.Directory.Length > b.Directory.Length) return 1; 
-            if (b.Directory.Length > a.Directory.Length) return -1;
-            return string.Compare(a.Directory, b.Directory, StringComparison.Ordinal);
-        }
-        
-        private int CompareAlphabetical(SceneData a, SceneData b)
-        {
-            if (!a) return -1;
-            if (!b) return 1;
-            return string.Compare(a.SceneName, b.SceneName, StringComparison.OrdinalIgnoreCase);
-        }
-        
-        private int CompareBuildIndex(SceneData a, SceneData b)
-        {
-            if (!a) return -1;
-            if (!b) return 1;
-            int indexOfA = GetBuildIndex(a);
-            int indexOfB = GetBuildIndex(b);
-            return indexOfA.CompareTo(indexOfB);
         }
 
         private void DrawScene(SceneData sceneData, string label, bool drawBuildControls, bool inBuild)
@@ -257,17 +217,7 @@ namespace IronMountain.SceneManagement.Editor
             }
             EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
         }
-        
-        private static int GetBuildIndex(SceneData sceneData)
-        {
-            if (!sceneData) return -1;
-            for (int i = 0; i < EditorBuildSettings.scenes.Length; i++)
-            {
-                if (EditorBuildSettings.scenes[i].path == sceneData.Path) return i;
-            }
-            return -1;
-        }
-        
+
         private static bool IncludedInBuild(SceneData sceneData)
         {
             if (!sceneData) return false;

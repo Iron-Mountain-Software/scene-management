@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -18,6 +19,7 @@ namespace IronMountain.SceneManagement
         [SerializeField] private string path;
         [SerializeField] private string directory;
         [SerializeField] private string sceneName;
+        [SerializeField] private int buildIndex;
         [SerializeField] private ScreenOrientation screenOrientation = ScreenOrientation.Portrait;
         [SerializeField] private bool setTimeScale = true;
         [SerializeField] private float startTimeScale = 1f;
@@ -34,6 +36,7 @@ namespace IronMountain.SceneManagement
         public string Directory => directory;
         public virtual string Name => name;
         public virtual string SceneName => sceneName;
+        public virtual int BuildIndex => buildIndex;
         public ScreenOrientation ScreenOrientation => screenOrientation;
         public List<SceneList> DependencyLists => dependencyLists;
 #if UNITY_EDITOR
@@ -89,6 +92,11 @@ namespace IronMountain.SceneManagement
             path = scene ? AssetDatabase.GetAssetPath(scene) : string.Empty;
             directory = !string.IsNullOrWhiteSpace(path) ? System.IO.Path.GetDirectoryName(path) : string.Empty;
             sceneName = scene ? scene.name : string.Empty;
+            buildIndex = -1;
+            for (int i = 0; i < EditorBuildSettings.scenes.Length; i++)
+            {
+                if (EditorBuildSettings.scenes[i].path == path) buildIndex = i;
+            }
         }
 
         [ContextMenu("Generate New ID")]

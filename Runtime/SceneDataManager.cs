@@ -13,7 +13,7 @@ namespace IronMountain.SceneManagement
         {
             if (!sceneData || SceneData.Contains(sceneData)) return;
             SceneData.Add(sceneData);
-            SceneData.Sort(Compare);
+            SceneData.Sort(SceneListSorts.CompareSceneName);
             OnSceneDataChanged?.Invoke();
         }
         
@@ -22,13 +22,6 @@ namespace IronMountain.SceneManagement
             if (!sceneData || !SceneData.Contains(sceneData)) return;
             SceneData.Remove(sceneData);
             OnSceneDataChanged?.Invoke();
-        }
-
-        private static int Compare(SceneData a, SceneData b)
-        {
-            if (!a) return -1;
-            if (!b) return 1;
-            return string.Compare(a.SceneName, b.SceneName, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
