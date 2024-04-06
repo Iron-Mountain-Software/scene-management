@@ -8,7 +8,7 @@ namespace IronMountain.SceneManagement
         {
             if (!sceneData) return;
             if (SceneManager.Instance) SceneManager.Instance.LoadScene(sceneData);
-            else UnityEngine.SceneManagement.SceneManager.LoadScene(sceneData.name);
+            else UnityEngine.SceneManagement.SceneManager.LoadScene(sceneData.SceneName);
         }
     }
 }
