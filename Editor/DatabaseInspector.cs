@@ -18,11 +18,13 @@ namespace IronMountain.SceneManagement.Editor
         private void OnEnable()
         {
             _database = (Database) target;
+            EditorBuildSettings.sceneListChanged += Rebuild;
             SceneDataManager.OnSceneDataChanged += OnSceneDataChanged;
         }
 
         private void OnDisable()
         {
+            EditorBuildSettings.sceneListChanged -= Rebuild;
             SceneDataManager.OnSceneDataChanged -= OnSceneDataChanged;
         }
 
@@ -69,20 +71,20 @@ namespace IronMountain.SceneManagement.Editor
 
             serializedObject.ApplyModifiedProperties();
         }
+
+        private readonly Color _activeColor = new (1, 1, 1, 1f);
+        private readonly Color _inactiveColor = new (1, 1, 1, .2f);
         
         private void DrawSortButtons()
         {
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Sort:", GUILayout.Width(50), GUILayout.Height(25));
-            EditorGUI.BeginDisabledGroup(_sortType == SceneListSorts.Type.Path);
+            EditorGUILayout.BeginHorizontal(GUILayout.Height(25));
+            GUI.backgroundColor = _sortType == SceneListSorts.Type.Path ? _activeColor : _inactiveColor;
             if (GUILayout.Button("Path", GUILayout.ExpandHeight(true))) _sortType = SceneListSorts.Type.Path;
-            EditorGUI.EndDisabledGroup();
-            EditorGUI.BeginDisabledGroup(_sortType == SceneListSorts.Type.SceneName);
+            GUI.backgroundColor = _sortType == SceneListSorts.Type.SceneName ? _activeColor : _inactiveColor;
             if (GUILayout.Button("Scene Name", GUILayout.ExpandHeight(true))) _sortType = SceneListSorts.Type.SceneName;
-            EditorGUI.EndDisabledGroup();
-            EditorGUI.BeginDisabledGroup(_sortType == SceneListSorts.Type.BuildIndex);
+            GUI.backgroundColor = _sortType == SceneListSorts.Type.BuildIndex ? _activeColor : _inactiveColor;
             if (GUILayout.Button("Build Index", GUILayout.ExpandHeight(true))) _sortType = SceneListSorts.Type.BuildIndex;
-            EditorGUI.EndDisabledGroup();
+            GUI.backgroundColor = Color.white;
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space(5);
         }
@@ -120,9 +122,7 @@ namespace IronMountain.SceneManagement.Editor
         private void DrawBuildListView()
         {
             _database.Scenes.Sort(SceneListSorts.CompareBuildIndex);
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.BeginVertical();
-            GUILayout.Label("Not In Build:");
+            GUILayout.Label("Not included in build:");
             bool drewOtherLabel = false;
             foreach(SceneData sceneData in _database.Scenes)
             {
@@ -130,24 +130,18 @@ namespace IronMountain.SceneManagement.Editor
                 bool inBuild = sceneData.BuildIndex >= 0;
                 if (inBuild && !drewOtherLabel)
                 {
-                    EditorGUILayout.EndVertical();
-                    EditorGUILayout.BeginVertical(GUILayout.Width(10));
-                    EditorGUILayout.Space(5);
-                    EditorGUILayout.EndVertical();
-                    EditorGUILayout.BeginVertical();
-                    GUILayout.Label("In Build:");
+                    GUILayout.Label("Included in build:");
                     drewOtherLabel = true;
                 }
-                DrawScene(sceneData, sceneData.SceneName, true, inBuild);
+                bool modified = DrawScene(sceneData, sceneData.SceneName, true, inBuild);
+                if (modified) return;
             }
-            EditorGUILayout.EndVertical();
-            EditorGUILayout.EndHorizontal();
         }
 
-        private void DrawScene(SceneData sceneData, string label, bool drawBuildControls, bool inBuild)
+        private bool DrawScene(SceneData sceneData, string label, bool drawBuildControls, bool inBuild)
         {
-            if (!sceneData) return;
-            GUILayout.BeginHorizontal();
+            if (!sceneData) return false;
+            GUILayout.BeginHorizontal(GUILayout.Height(30));
             if (!_nestedEditors.ContainsKey(sceneData)) _nestedEditors.Add(sceneData, null);
             bool open = _nestedEditors[sceneData];
             open = EditorGUILayout.Toggle("", open, GUILayout.Width(20));
@@ -161,8 +155,28 @@ namespace IronMountain.SceneManagement.Editor
             {
                 _nestedEditors[sceneData] = null;
             }
-            if (GUILayout.Button(label, GUILayout.Height(25))) EditorGUIUtility.PingObject(sceneData);
-            if (GUILayout.Button("Load", GUILayout.Width(60), GUILayout.Height(25)))
+            
+            if (drawBuildControls && inBuild)
+            {
+                EditorGUILayout.BeginVertical(GUILayout.Width(30));
+                bool first = sceneData.BuildIndex == 0;
+                bool last = sceneData.BuildIndex == EditorBuildSettings.scenes.Length - 1;
+                if (!first && GUILayout.Button("▲", GUILayout.ExpandWidth(true), GUILayout.Height(last ? 30 : 15)))
+                {
+                    MoveUp(sceneData);
+                    return true;
+                }
+                if (!last && GUILayout.Button("▼", GUILayout.ExpandWidth(true), GUILayout.Height(first ? 30 : 15)))
+                {
+                    MoveDown(sceneData);
+                    return true;
+                }
+                EditorGUILayout.EndVertical();
+            }
+            
+            if (GUILayout.Button(label, GUILayout.ExpandHeight(true))) EditorGUIUtility.PingObject(sceneData);
+            
+            if (GUILayout.Button("Load", GUILayout.ExpandHeight(true), GUILayout.Width(50)))
             {
                 if (Application.isPlaying)
                 {
@@ -175,13 +189,15 @@ namespace IronMountain.SceneManagement.Editor
 
             if (drawBuildControls)
             {
-                if (!inBuild && GUILayout.Button("+", GUILayout.Width(25), GUILayout.Height(25)))
+                if (!inBuild && GUILayout.Button("＋", GUILayout.Width(30), GUILayout.ExpandHeight(true)))
                 {
                     Append(sceneData);
-                } 
-                else if (inBuild && GUILayout.Button(EditorGUIUtility.IconContent("d_TreeEditor.Trash"), GUILayout.Width(25), GUILayout.Height(25)))
+                    return true;
+                }
+                if (inBuild && GUILayout.Button("-", GUILayout.Width(30), GUILayout.ExpandHeight(true)))
                 {
                     Remove(sceneData);
+                    return true;
                 }
             }
             GUILayout.EndHorizontal();
@@ -192,32 +208,68 @@ namespace IronMountain.SceneManagement.Editor
                 _nestedEditors[sceneData].OnInspectorGUI();
                 EditorGUI.indentLevel -= 2;
             }
+
+            return false;
+        }
+        
+        private void MoveUp(SceneData sceneData)
+        {
+            if (!sceneData) return;
+            int sceneIndex = -1;
+            List<EditorBuildSettingsScene> scenes = new List<EditorBuildSettingsScene>();
+            for (int index = 0; index < EditorBuildSettings.scenes.Length; index++)
+            {
+                EditorBuildSettingsScene entry = EditorBuildSettings.scenes[index];
+                scenes.Add(entry);
+                if (entry.path == sceneData.Path) sceneIndex = index;
+            }
+            if (sceneIndex <= 0) return;
+            EditorBuildSettingsScene temp = scenes[sceneIndex - 1];
+            scenes[sceneIndex - 1] = scenes[sceneIndex];
+            scenes[sceneIndex] = temp;
+            EditorBuildSettings.scenes = scenes.ToArray();
+        }
+        
+        private void MoveDown(SceneData sceneData)
+        {
+            if (!sceneData) return;
+            int sceneIndex = -1;
+            List<EditorBuildSettingsScene> scenes = new List<EditorBuildSettingsScene>();
+            for (int index = 0; index < EditorBuildSettings.scenes.Length; index++)
+            {
+                EditorBuildSettingsScene entry = EditorBuildSettings.scenes[index];
+                scenes.Add(entry);
+                if (entry.path == sceneData.Path) sceneIndex = index;
+            }
+            if (sceneIndex < 0 || sceneIndex >= scenes.Count) return;
+            EditorBuildSettingsScene temp = scenes[sceneIndex + 1];
+            scenes[sceneIndex + 1] = scenes[sceneIndex];
+            scenes[sceneIndex] = temp;
+            EditorBuildSettings.scenes = scenes.ToArray();
         }
         
         private void Append(SceneData sceneData)
         {
             if (!sceneData) return;
-            List<EditorBuildSettingsScene> editorBuildSettingsScenes = new List<EditorBuildSettingsScene>();
+            List<EditorBuildSettingsScene> scenes = new List<EditorBuildSettingsScene>();
             foreach (EditorBuildSettingsScene entry in EditorBuildSettings.scenes)
             {
-                editorBuildSettingsScenes.Add(new EditorBuildSettingsScene(entry.path, entry.enabled));
+                scenes.Add(entry);
             }
-            editorBuildSettingsScenes.Add(new EditorBuildSettingsScene(sceneData.Path, true));
-            EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
-            Rebuild();
+            scenes.Add(new EditorBuildSettingsScene(sceneData.Path, true));
+            EditorBuildSettings.scenes = scenes.ToArray();
         }
         
         private void Remove(SceneData sceneData)
         {
             if (!sceneData) return;
-            List<EditorBuildSettingsScene> editorBuildSettingsScenes = new List<EditorBuildSettingsScene>();
+            List<EditorBuildSettingsScene> scenes = new List<EditorBuildSettingsScene>();
             foreach (EditorBuildSettingsScene entry in EditorBuildSettings.scenes)
             {
                 if (entry.path == sceneData.Path) continue;
-                editorBuildSettingsScenes.Add(new EditorBuildSettingsScene(entry.path, entry.enabled));
+                scenes.Add(entry);
             }
-            EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
-            Rebuild();
+            EditorBuildSettings.scenes = scenes.ToArray();
         }
 
         private void Rebuild()

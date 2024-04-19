@@ -29,6 +29,7 @@ namespace IronMountain.SceneManagement.Editor
             EditorGUILayout.PropertyField(serializedObject.FindProperty("directory"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("sceneName"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("buildIndex"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("buildEnabled"));
             EditorGUI.EndDisabledGroup();
             EditorGUILayout.PropertyField(serializedObject.FindProperty("screenOrientation"));
             GUILayout.BeginHorizontal();
@@ -82,6 +83,7 @@ namespace IronMountain.SceneManagement.Editor
                 "directory",
                 "sceneName",
                 "buildIndex",
+                "buildEnabled",
                 "screenOrientation",
                 "setTimeScale",
                 "startTimeScale",

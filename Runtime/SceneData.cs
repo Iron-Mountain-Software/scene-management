@@ -10,7 +10,13 @@ namespace IronMountain.SceneManagement
     [CreateAssetMenu(menuName = "Scriptable Objects/Scene Management/Scene Data")]
     public class SceneData : ScriptableObject
     {
-        
+        [Serializable]
+        public struct BuildSettings
+        {
+            [SerializeField] public int index;
+            [SerializeField] public bool enabled;
+        }
+
 #if UNITY_EDITOR
         [SerializeField] public SceneAsset scene;
 #endif
@@ -20,6 +26,7 @@ namespace IronMountain.SceneManagement
         [SerializeField] private string directory;
         [SerializeField] private string sceneName;
         [SerializeField] private int buildIndex;
+        [SerializeField] private bool buildEnabled;
         [SerializeField] private ScreenOrientation screenOrientation = ScreenOrientation.Portrait;
         [SerializeField] private bool setTimeScale = true;
         [SerializeField] private float startTimeScale = 1f;
@@ -36,7 +43,8 @@ namespace IronMountain.SceneManagement
         public string Directory => directory;
         public virtual string Name => name;
         public virtual string SceneName => sceneName;
-        public virtual int BuildIndex => buildIndex;
+        public int BuildIndex => buildIndex;
+        public bool BuildEnabled => buildEnabled;
         public ScreenOrientation ScreenOrientation => screenOrientation;
         public List<SceneList> DependencyLists => dependencyLists;
 #if UNITY_EDITOR
@@ -93,9 +101,12 @@ namespace IronMountain.SceneManagement
             directory = !string.IsNullOrWhiteSpace(path) ? System.IO.Path.GetDirectoryName(path) : string.Empty;
             sceneName = scene ? scene.name : string.Empty;
             buildIndex = -1;
+            buildEnabled = false;
             for (int i = 0; i < EditorBuildSettings.scenes.Length; i++)
             {
-                if (EditorBuildSettings.scenes[i].path == path) buildIndex = i;
+                if (EditorBuildSettings.scenes[i].path != path) continue;
+                buildIndex = i;
+                buildEnabled = EditorBuildSettings.scenes[i].enabled;
             }
         }
 
