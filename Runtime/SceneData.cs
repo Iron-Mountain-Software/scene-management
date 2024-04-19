@@ -52,6 +52,12 @@ namespace IronMountain.SceneManagement
 #endif
         public List<string> Dependencies => dependencies;
 
+        public void CacheBuildDetails(int index, bool enabled)
+        {
+            buildIndex = index;
+            buildEnabled = enabled;
+        }
+
         public bool DependsOn(Scene scene)
         {
             return dependencies != null && dependencies.Contains(scene.name);

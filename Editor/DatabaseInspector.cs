@@ -18,13 +18,13 @@ namespace IronMountain.SceneManagement.Editor
         private void OnEnable()
         {
             _database = (Database) target;
-            EditorBuildSettings.sceneListChanged += Rebuild;
+            EditorBuildSettings.sceneListChanged += OnSceneListChanged;
             SceneDataManager.OnSceneDataChanged += OnSceneDataChanged;
         }
 
         private void OnDisable()
         {
-            EditorBuildSettings.sceneListChanged -= Rebuild;
+            EditorBuildSettings.sceneListChanged -= OnSceneListChanged;
             SceneDataManager.OnSceneDataChanged -= OnSceneDataChanged;
         }
 
@@ -295,6 +295,20 @@ namespace IronMountain.SceneManagement.Editor
             AssetDatabase.Refresh();
         }
 
+        private void OnSceneListChanged()
+        {
+            if (!_database) return;
+            for (var index = 0; index < EditorBuildSettings.scenes.Length; index++)
+            {
+                EditorBuildSettingsScene entry = EditorBuildSettings.scenes[index];
+                SceneData sceneData = _database.GetSceneByPath(entry.path);
+                if (!sceneData) continue;
+                sceneData.CacheBuildDetails(index, entry.enabled);
+                EditorUtility.SetDirty(sceneData);
+            }
+            EditorUtility.SetDirty(_database);
+        }
+        
         private void OnSceneDataChanged()
         {
             bool dirty = false;

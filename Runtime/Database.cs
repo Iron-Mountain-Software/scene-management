@@ -25,6 +25,11 @@ namespace IronMountain.SceneManagement
             return scenes.Find(test=> test && test.SceneName == sceneName);
         }
         
+        public SceneData GetSceneByPath(string scenePath)
+        {
+            return scenes.Find(test=> test && test.Path == scenePath);
+        }
+        
         public SceneData GetSceneByID(string id)
         {
             if (string.IsNullOrWhiteSpace(id)) return null;
@@ -42,7 +47,7 @@ namespace IronMountain.SceneManagement
 
         public void SortList()
         {
-            scenes.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));   
+            scenes.Sort((a, b) => string.Compare(a.name, b.name, StringComparison.OrdinalIgnoreCase));   
         }
 
         public void RebuildDictionary()
@@ -55,8 +60,8 @@ namespace IronMountain.SceneManagement
                 try  
                 {
                     if (!scene) throw new Exception("Null Scene");
-                    if (string.IsNullOrWhiteSpace(scene.ID)) throw new Exception("Scene Data with empty key: " + scene.Name);
-                    if (_dictionary.ContainsKey(scene.ID)) throw new Exception("Scene Data with duplicate keys: " + scene.Name + ", " + _dictionary[scene.ID].Name);
+                    if (string.IsNullOrWhiteSpace(scene.ID)) throw new Exception("Scene Data with empty key: " + scene.name);
+                    if (_dictionary.ContainsKey(scene.ID)) throw new Exception("Scene Data with duplicate keys: " + scene.name + ", " + _dictionary[scene.ID].name);
                     _dictionary.Add(scene.ID, scene);
                 }  
                 catch (Exception exception)  
@@ -77,7 +82,7 @@ namespace IronMountain.SceneManagement
             {
                 result.Append(scene.ID);
                 result.Append("\t");
-                result.Append(scene.Name);
+                result.Append(scene.name);
                 result.Append("\n");
             }
             result.Append("</SCENES>\n");
