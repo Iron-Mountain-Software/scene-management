@@ -1,5 +1,5 @@
 # Scene Management
-*Version: 1.5.0*
+*Version: 1.7.1*
 ## Description: 
 A system for loading scenes, tracking scene dependencies, and storing scene metadata.
 ## Use Cases: 
@@ -9,19 +9,19 @@ A system for loading scenes, tracking scene dependencies, and storing scene meta
 * Manage scene dependencies and automatically load them when they're needed. 
 * Manage lists of scenes, and apply a list to the build settings.
 ## Directions for Use: 
-SceneData
-Scriptable Object that stores metadata about a scene.
-Must be named exactly the same as the scene it represents.
-Create > Scriptable Objects > Scene Management > SceneData
-SceneDatabase
-Stores all SceneData instances, and is used to rapidly switch between scenes.
-Create > Scriptable Objects > Scene Management > Database
-SceneList
-A customizable list of SceneDatas.
-Create > Scriptable Objects > Scene Management > SceneList
-SceneManager (singleton)
-Attach to a GameObject.
-Use this singleton to load scenes.
+1. SceneData
+   1. Scriptable Object that stores metadata about a scene.
+   1. Must be named exactly the same as the scene it represents.
+   1. Create > Scriptable Objects > Scene Management > SceneData
+1. SceneDatabase
+   1. Stores all SceneData instances, and is used to rapidly switch between scenes.
+   1. Create > Scriptable Objects > Scene Management > Database
+1. SceneManager (singleton)
+   1. Attach to a GameObject.
+   1. Use this singleton to load scenes.
+1. SceneList
+   1. A customizable list of SceneDatas.
+   1. Create > Scriptable Objects > Scene Management > SceneList
 ## Package Mirrors: 
 [<img src='https://img.itch.zone/aW1nLzEzNzQ2ODg3LnBuZw==/original/npRUfq.png'>](https://github.com/Iron-Mountain-Software/scene-management)[<img src='https://img.itch.zone/aW1nLzEzNzQ2ODkyLnBuZw==/original/Fq0ORM.png'>](https://www.npmjs.com/package/com.iron-mountain.scene-management)[<img src='https://img.itch.zone/aW1nLzEzNzQ2ODk4LnBuZw==/original/Rv4m96.png'>](https://iron-mountain.itch.io/scene-management)
 ---
@@ -33,6 +33,7 @@ Use this singleton to load scenes.
       * public SceneData ***FirstGameScene***  { get; }
    * Methods: 
       * public SceneData ***GetSceneByName***(String sceneName)
+      * public SceneData ***GetSceneByPath***(String scenePath)
       * public SceneData ***GetSceneByID***(String id)
       * public SceneData ***GetRandomScene***()
       * public void ***SortList***()
@@ -46,13 +47,17 @@ Use this singleton to load scenes.
    * Properties: 
       * public String ***ID***  { get; }
       * public String ***Path***  { get; }
+      * public String ***Directory***  { get; }
       * public String ***Name***  { get; }
       * public String ***SceneName***  { get; }
+      * public Int32 ***BuildIndex***  { get; }
+      * public Boolean ***BuildEnabled***  { get; }
       * public ScreenOrientation ***ScreenOrientation***  { get; }
       * public List<SceneList> ***DependencyLists***  { get; }
       * public List<SceneAsset> ***DependencyScenes***  { get; }
       * public List<String> ***Dependencies***  { get; }
    * Methods: 
+      * public void ***CacheBuildDetails***(Int32 index, Boolean enabled)
       * public Boolean ***DependsOn***(Scene scene)
       * public void ***Load***(float delay)
       * public void ***Load***()
@@ -66,6 +71,7 @@ Use this singleton to load scenes.
    * Properties: 
       * public List<SceneAsset> ***Scenes***  { get; }
       * public List<String> ***SceneNames***  { get; }
+1. public static class **SceneListSorts**
 1. public static class **SceneListsManager**
 1. public class **SceneManager** : MonoBehaviour
    * Properties: 
@@ -122,8 +128,12 @@ Use this singleton to load scenes.
 1. public class **SceneLaunchManagerStatusText** : MonoBehaviour
 ### U I
 1. public class **BasicSceneChangeButton** : SceneChangeButton
+   * Actions: 
+      * public event Action ***OnSceneDataChanged*** 
    * Properties: 
-      * public SceneData ***SceneData***  { get; }
+      * public SceneData ***SceneData***  { get; set; }
+1. public class **BasicSceneChangeButtonList** : MonoBehaviour
+1. public class **BasicSceneChangeButtonSceneNameLabel** : MonoBehaviour
 1. public class **CloseApplicationButton** : MonoBehaviour
 1. public abstract class **SceneChangeButton** : SceneChanger
 1. public class **SceneFadingAnimation** : MonoBehaviour

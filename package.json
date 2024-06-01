@@ -23,7 +23,37 @@
     "Manage scene dependencies and automatically load them when they're needed. ",
     "Manage lists of scenes, and apply a list to the build settings."
   ],
-  "directions": "SceneData\nScriptable Object that stores metadata about a scene.\nMust be named exactly the same as the scene it represents.\nCreate > Scriptable Objects > Scene Management > SceneData\nSceneDatabase\nStores all SceneData instances, and is used to rapidly switch between scenes.\nCreate > Scriptable Objects > Scene Management > Database\nSceneList\nA customizable list of SceneDatas.\nCreate > Scriptable Objects > Scene Management > SceneList\nSceneManager (singleton)\nAttach to a GameObject.\nUse this singleton to load scenes.",
+  "instructions": [
+    {
+      "text": "SceneData",
+      "details": [
+        "Scriptable Object that stores metadata about a scene.",
+        "Must be named exactly the same as the scene it represents.",
+        "Create > Scriptable Objects > Scene Management > SceneData"
+      ]
+    },
+    {
+      "text": "SceneDatabase",
+      "details": [
+        "Stores all SceneData instances, and is used to rapidly switch between scenes.",
+        "Create > Scriptable Objects > Scene Management > Database"
+      ]
+    },
+    {
+      "text": "SceneManager (singleton)",
+      "details": [
+        "Attach to a GameObject.",
+        "Use this singleton to load scenes."
+      ]
+    },
+    {
+      "text": "SceneList",
+      "details": [
+        "A customizable list of SceneDatas.",
+        "Create > Scriptable Objects > Scene Management > SceneList"
+      ]
+    }
+  ],
   "keywords": [
     "resources",
     "tools",
@@ -42,5 +72,6 @@
       "type": "itch.io",
       "url": "https://iron-mountain.itch.io/scene-management"
     }
-  ]
+  ],
+  "dependencies": {}
 }
